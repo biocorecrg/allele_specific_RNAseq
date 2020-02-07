@@ -1,0 +1,5 @@
+log*
+test_data
+work
+singularity
+.nextflow*
