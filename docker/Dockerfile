@@ -1,4 +1,4 @@
-FROM biocorecrg/centos-perlbrew-pyenv-java:centos7
+FROM biocorecrg/centos-perlbrew-pyenv3-java:centos7
 
 # File Author / Maintainer
 MAINTAINER Toni Hermoso Pulido <toni.hermoso@crg.eu>
@@ -58,6 +58,9 @@ RUN tar -zvxf tool_ver.tar.gz
 RUN mv make_tool_desc_for_multiqc-${TOOL_MULTIQC_VERSION}/make_tool_desc_for_multiqc.pl /usr/local/bin/ 
 RUN chmod +x /usr/local/bin/make_tool_desc_for_multiqc.pl
 RUN rm -fr make_tool_desc_for_multiqc-* v${TOOL_MULTIQC_VERSION}.tar.gz 
+RUN pip install --upgrade pip
+RUN pip install cython 
+RUN pip install pysam 
 
 #cleaning
 RUN yum clean all

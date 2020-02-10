@@ -32,9 +32,9 @@ BIOCORE@CRG RNAseq - N F  ~  version ${version}
 BIOCORE@CRG Allele Specific RNAseq - N F  ~  version ${version}
 ====================================================
 reads                         : ${params.reads}
-genomeA                       : ${params.genomeA}
-genomeB                       : ${params.genomeB}
+genome                        : ${params.genome}
 annotation                    : ${params.annotation}
+variants                      : ${params.variants}
 single (YES or NO)            : ${params.single}
 output (output folder)        : ${params.output}
 UCSCgenomeID genome ID 
@@ -61,14 +61,14 @@ if (params.resume) exit 1, "Are you making the classical --resume typo? Be caref
  * Setting the reference genome file and the annotation file (validation)
  */
  
-genome_fileA = file(params.genomeA)
-genome_fileB = file(params.genomeB)
+genome_file = file(params.genome)
+variants_file = file(params.variants)
 annotation_file = file(params.annotation)
 multiconfig = file("config.yaml")
 
-if( !genome_fileA.exists() ) exit 1, "Missing genome file: ${genome_fileA}"
-if( !genome_fileB.exists() ) exit 1, "Missing genome file: ${genome_fileB}"
+if( !genome_file.exists() ) exit 1, "Missing genome file: ${genome_file}"
 if( !annotation_file.exists() ) exit 1, "Missing annotation file: ${annotation_file}"
+if( !variants_file.exists() ) exit 1, "Missing variations file: ${variants_file}"
 
 subsize          = 5000000
 outputfolder    = "${params.output}"
@@ -109,7 +109,7 @@ Channel
  */
 Channel
     .fromFilePairs( params.reads , size: (params.single != "NO") ? 1 : 2)
-    .into { raw_reads_for_mapping; raw_reads_for_trimming }
+    .set { reads_for_mapping }
 
 
 /*
@@ -142,7 +142,6 @@ workflow.onComplete {
 process QConRawReads {
     tag { read }
     publishDir outputQC
-	afterScript 'mv *_fastqc.zip `basename *_fastqc.zip _fastqc.zip`_raw_fastqc.zip'
 
     input:
     file(read) from reads_for_fastqc.flatten()
@@ -153,7 +152,6 @@ process QConRawReads {
     script:
     """
     fastqc -t ${task.cpus} $read
-    mv *_fastqc.zip `basename *_fastqc.zip _fastqc.zip`_raw_fastqc.zip
     """
 
 }
@@ -166,7 +164,7 @@ process getReadLength {
     file(single_read_pairs) from read_files_for_size.first()
 
     output:
-    stdout into (read_length_for_trimming, read_length_for_index, read_length_for_profile)
+    stdout into (read_length_for_index, read_length_for_profile)
 
     script:
     """
@@ -176,7 +174,6 @@ process getReadLength {
 }
 
 
-Channel.from( ["${genome_fileA.getSimpleName()}", genome_fileA], ["${genome_fileB.getSimpleName()}", genome_fileB] ).set{genomes}
 
 /*
  * Builds the genome index required by the mapping process by using STAR aligner
@@ -189,15 +186,16 @@ process buildIndex {
     tag { "${genome_file} with ${annotation_file}" }
     
     input:
-    set genome_id, file(genome_file) from genomes
+    file(genome_file)
     file annotation_file
     // trick for converting a stdout value in integer...
     val read_size from read_length_for_index.map { it.trim().toInteger() }
 
     output:
-    file genome_id into STARgenomeIndex, STARgenomeIndexForCoverage
+    file "index" into STARgenomeIndex, STARgenomeIndexForCoverage
 
     script:
+    def genome_id = "index"
         """
         mkdir ${genome_id}
         if [ `echo ${genome_file} | grep ".gz"` ]; then 
@@ -219,33 +217,52 @@ process buildIndex {
 
 /*
  * Align reads by using STAR mapper. 
+ * To preserve the order of aligned reads we have to use one thread 
+ * and sorting order none
 */
 
 process mapping {
+    tag { "${pair_id} on ${STARgenome}" }
     label 'big_comp'
-    tag { pair_id }
-    publishDir outputCounts, pattern: "STAR_${pair_id}/*ReadsPerGene.out.tab",  mode: 'copy'
-    publishDir outputQC, pattern: "STAR_${pair_id}/*Log.final.out", mode: 'copy'
+    	//publishDir outputCounts, pattern: "STAR_${pair_id}/*ReadsPerGene.out.tab",  mode: 'copy'
+    	publishDir outputQC, pattern: "STAR_${pair_id}/*Log.final.out", mode: 'copy'
 
         input:
-        file STARgenome from STARgenomeIndex
-        set pair_id, file(reads) from reads_for_mapping_clean
-
+        set pair_id, file(reads) from reads_for_mapping
+        file(STARgenome) from STARgenomeIndex
+        file(variants_file)
+        
         output:
-        set pair_id, file("STAR_${pair_id}/${pair_id}Aligned.sortedByCoord.out.bam") into STARmappedBam_for_qualimap, STARmappedBam_for_indexing
-        file("STAR_${pair_id}") into Aln_folders_for_multiqc
-        file("STAR_${pair_id}/${pair_id}ReadsPerGene.out.tab")
+        set pair_id, file("${pair_id}/*out.bam") into STARmappedBam_for_filtering
+        file("${pair_id}") into Aln_folders_for_multiqc
 
         script:
-        def aligner = new NGSaligner(id:pair_id, reads:reads, index:STARgenome, cpus:task.cpus, output:"STAR_${pair_id}") 
-        aligner.doAlignment("STAR")  
+        def output = "${pair_id}"
+        def variants = unzipBash("${variants_file}") 
+        """
+        if [ `echo "${reads}"| cut -f 1 -d " " | grep ".gz"` ]; then gzipped=" --readFilesCommand zcat "; else gzipped=""; fi
+            STAR --genomeDir ${STARgenome} \
+                 --readFilesIn ${reads} \
+                  \$gzipped \
+                  --waspOutputMode SAMtag \
+                  --outSAMunmapped Within \
+                  --outSAMtype BAM Unsorted\
+                  --runThreadN ${task.cpus} \
+                  --outFileNamePrefix ${pair_id}-${STARgenome} \
+                  --outSAMattributes NH HI AS nM NM MD jM jI XS MC ch vA vW vG \
+                  --varVCFfile ${variants}
+                  mkdir ${output}
+                  mv *Aligned* ${output}/.
+                  mv *SJ* ${output}/.
+                  mv *Log* ${output}/. 
+        """
         
 }
 
-
-
+/*
  * Step 7. QualiMap QC.
 
+ 
 process qualimap {
     label 'big_comp'
     tag { pair_id }
@@ -303,25 +320,26 @@ process multiQC_report {
 }
 
 
-
- * Index Bam files 
-
-process indexBam {
-    publishDir outputMapping, mode: 'copy'
+/*
+ * Filter Bam files 
+ */
+process filterBam {
+    //publishDir outputMapping, mode: 'copy'
     tag { pair_id }
 
     input:
-    set pair_id, file(bamfile) from STARmappedBam_for_indexing
+    set pair_id, file(bamfile) from STARmappedBam_for_filtering
 
     output:
-    set pair_id, file(bamfile), file("${bamfile}.bai") into bamFiles 
+    set pair_id, file("{$pair_id}*") into allele_bams
     
     script:
-    def misc = new Misc(input:bamfile)
-    misc.st_indexBam()
+    """
+	splitBamPerAlleles.py -i ${bamfile} -o ${pair_id}
+    """
 }
 
-
+/*
  * Convert to BedGraph
 
 
@@ -379,7 +397,16 @@ process convertToBigWig {
         reporter.makeBigWigTrackDB()        
     }
  */
- 
+
+// make named pipe 
+def unzipBash(filename) { 
+    cmd = filename.toString()
+    if (cmd[-3..-1] == ".gz") {
+    	cmd = "<(zcat ${filename})"
+    }
+    return cmd
+}
+
 workflow.onComplete {
     println "Pipeline BIOCORE@CRG Master of Pore completed!"
     println "Started at  $workflow.start" 

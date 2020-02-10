@@ -2,4 +2,5 @@ log*
 test_data
 work
 singularity
+output
 .nextflow*
