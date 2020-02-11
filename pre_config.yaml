@@ -1,0 +1,21 @@
+custom_logo: '/software/bi/biocore_tools/logo/biocore-logo.png'
+custom_logo_url: 'https://biocore.crg.eu'
+custom_logo_title: 'Bioinformatics Core Facility @ CRG'
+
+extra_fn_clean_trim: 
+   - '-trimmed'
+   - '_log'
+
+table_columns_visible:
+    FastQC:
+        percent_gc: False    
+        percent_duplicates: False
+
+module_order:
+ - fastqc:
+        name: 'FastQC'
+        path_filters:
+            - '*_fastqc.zip'
+        info: 'FastQC results of raw reads'
+ - star
+ - htseq
