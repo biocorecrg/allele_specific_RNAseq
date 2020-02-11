@@ -9,6 +9,7 @@ ARG QUALIMAP_VERSION=2.2.1
 ARG MULTIQC_VERSION=1.8
 ARG SAMTOOLS_VERSION=1.10
 ARG TOOL_MULTIQC_VERSION=1.1
+ARG HTSEQ_VERSION=0.11.1
 
 #INSTALLING FASTQC
 RUN bash -c 'curl -k -L https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${FASTQC_VERSION}.zip > fastqc.zip'
@@ -30,14 +31,6 @@ RUN ln -s $PWD/qualimap_v${QUALIMAP_VERSION}/qualimap /usr/local/bin/
 # Installing MULTIQC // Latest dev version is much better. 
 # RUN pip install -Iv https://github.com/ewels/MultiQC/archive/v${MULTIQC_VERSION}.tar.gz 
 RUN pip install --upgrade --force-reinstall git+https://github.com/ewels/MultiQC.git
-
-# Improving indexing of star
-#COPY bin/index_star.sh   /usr/local/bin/
-#RUN chmod +x /usr/local/bin/index_star.sh
-
-# Adding coverage calc 
-#COPY bin/coverage.sh /usr/local/bin/
-#RUN chmod +x /usr/local/bin/coverage.sh
 
 # Installing samtools
 RUN yum install -y xz-devel.x86_64
@@ -61,6 +54,10 @@ RUN rm -fr make_tool_desc_for_multiqc-* v${TOOL_MULTIQC_VERSION}.tar.gz
 RUN pip install --upgrade pip
 RUN pip install cython 
 RUN pip install pysam 
+
+#Installing HTSEQ
+RUN pip install numpy matplotlib
+RUN pip install HTSEQ==${HTSEQ_VERSION}
 
 #cleaning
 RUN yum clean all

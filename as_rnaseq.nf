@@ -34,6 +34,7 @@ BIOCORE@CRG Allele Specific RNAseq - N F  ~  version ${version}
 reads                         : ${params.reads}
 genome                        : ${params.genome}
 annotation                    : ${params.annotation}
+strandness                    : ${params.strandness}
 variants                      : ${params.variants}
 single (YES or NO)            : ${params.single}
 output (output folder)        : ${params.output}
@@ -55,7 +56,7 @@ if (params.help) {
 }
 
 if (params.resume) exit 1, "Are you making the classical --resume typo? Be careful!!!! ;)"
-
+if (params.strandness != "unstranded" && params.strandness != "forward" && params.strandness != "reverse" ) exit 1, "Please define either forward, reverse or unstranded as strandness parameter\n"
 
 /*
  * Setting the reference genome file and the annotation file (validation)
@@ -181,7 +182,7 @@ process getReadLength {
  */
  
 process buildIndex {
-    publishDir outputIndex
+    storeDir outputIndex
     label 'big_comp'
     tag { "${genome_file} with ${annotation_file}" }
     
@@ -192,27 +193,26 @@ process buildIndex {
     val read_size from read_length_for_index.map { it.trim().toInteger() }
 
     output:
-    file "index" into STARgenomeIndex, STARgenomeIndexForCoverage
+    file "*" into STARgenomeIndex, STARgenomeIndexForCoverage
 
     script:
-    def genome_id = "index"
-        """
-        mkdir ${genome_id}
-        if [ `echo ${genome_file} | grep ".gz"` ]; then 
-            zcat ${genome_file} > `basename ${genome_file} .gz` 
-            STAR --runMode genomeGenerate --genomeDir ${genome_id} --runThreadN ${task.cpus} \
-            --genomeFastaFiles `basename ${genome_file} .gz` --sjdbOverhang ${read_size} --sjdbGTFfile ${annotation_file} \
-            --outFileNamePrefix `basename ${genome_file} .gz` 
-            rm `basename ${genome_file} .gz`
-        else 
-            STAR --runMode genomeGenerate --genomeDir ${genome_id} --runThreadN ${task.cpus} \
-            --genomeFastaFiles ${genome_file} --sjdbOverhang ${read_size} --sjdbGTFfile ${annotation_file} \
-            --outFileNamePrefix ${genome_file} 
-        fi
-        """
+    def genome_id = genome_file.simpleName()
+    
+    """
+    mkdir ${genome_id}
+    if [ `echo ${genome_file} | grep ".gz"` ]; then 
+        zcat ${genome_file} > `basename ${genome_file} .gz` 
+        STAR --runMode genomeGenerate --genomeDir ${genome_id} --runThreadN ${task.cpus} \
+        --genomeFastaFiles `basename ${genome_file} .gz` --sjdbOverhang ${read_size} --sjdbGTFfile ${annotation_file} \
+        --outFileNamePrefix `basename ${genome_file} .gz` 
+        rm `basename ${genome_file} .gz`
+    else 
+        STAR --runMode genomeGenerate --genomeDir ${genome_id} --runThreadN ${task.cpus} \
+        --genomeFastaFiles ${genome_file} --sjdbOverhang ${read_size} --sjdbGTFfile ${annotation_file} \
+        --outFileNamePrefix ${genome_file} 
+    fi
+    """
 }
-
-
 
 
 /*
@@ -331,13 +331,45 @@ process filterBam {
     set pair_id, file(bamfile) from STARmappedBam_for_filtering
 
     output:
-    set pair_id, file("{$pair_id}*") into allele_bams
+    set pair_id, file("${pair_id}_*.bam") into allele_bams
     
     script:
     """
 	splitBamPerAlleles.py -i ${bamfile} -o ${pair_id}
     """
 }
+
+/*
+ * Counts tags with HTSEQ
+ */
+
+process countTags {
+	
+	publishDir outputCounts, mode: 'copy'
+    tag { bamfile }
+
+	input:
+	file(annotation_file)
+	set pair_id, file(bamfile) from allele_bams.transpose()
+
+	output:
+	file("*.counts") into tag_counts_for_multiqc       
+       
+	script:
+	def strandness = ""
+    if (params.strandness=="unstranded") {
+    	strandness = "no"
+    } else if (params.strandness=="forward") {
+        strandness = "yes"
+    } else if (params.strandness=="reverse") {
+         strandness = "reverse"
+    }
+    script:
+    """
+    htseq-count -s ${strandness} -f bam ${bamfile} ${annotation_file} > `basename ${bamfile} .bam`.counts
+    """
+}
+
 
 /*
  * Convert to BedGraph
@@ -406,6 +438,16 @@ def unzipBash(filename) {
     }
     return cmd
 }
+
+// extract unzip pipe 
+def getUnzipName(filename) { 
+    name = filename.toString()
+    if (name[-3..-1] == ".gz") {
+    	name = name.baseName
+    }
+    return name
+}
+
 
 workflow.onComplete {
     println "Pipeline BIOCORE@CRG Master of Pore completed!"
