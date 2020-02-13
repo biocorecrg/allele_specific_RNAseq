@@ -10,7 +10,7 @@ table_columns_visible:
     FastQC:
         percent_gc: False    
         percent_duplicates: False
-
+        percent_assigned: False
 module_order:
  - fastqc:
         name: 'FastQC'

@@ -65,7 +65,7 @@ if (params.strandness != "unstranded" && params.strandness != "forward" && param
 genome_file = file(params.genome)
 variants_file = file(params.variants)
 annotation_file = file(params.annotation)
-multiconfig = file("config.yaml")
+multiconfig = file("pre_config.yaml")
 
 if( !genome_file.exists() ) exit 1, "Missing genome file: ${genome_file}"
 if( !annotation_file.exists() ) exit 1, "Missing annotation file: ${annotation_file}"
@@ -182,7 +182,7 @@ process getReadLength {
  */
  
 process buildIndex {
-    storeDir outputIndex
+    publishDir outputIndex
     label 'big_comp'
     tag { "${genome_file} with ${annotation_file}" }
     
@@ -193,10 +193,10 @@ process buildIndex {
     val read_size from read_length_for_index.map { it.trim().toInteger() }
 
     output:
-    file "*" into STARgenomeIndex, STARgenomeIndexForCoverage
+    path "*", type: 'dir' into STARgenomeIndex, STARgenomeIndexForCoverage
 
     script:
-    def genome_id = genome_file.simpleName()
+    def genome_id = genome_file.simpleName
     
     """
     mkdir ${genome_id}
@@ -222,7 +222,7 @@ process buildIndex {
 */
 
 process mapping {
-    tag { "${pair_id} on ${STARgenome}" }
+    tag { "${pair_id}" }
     label 'big_comp'
     	//publishDir outputCounts, pattern: "STAR_${pair_id}/*ReadsPerGene.out.tab",  mode: 'copy'
     	publishDir outputQC, pattern: "STAR_${pair_id}/*Log.final.out", mode: 'copy'
@@ -248,7 +248,7 @@ process mapping {
                   --outSAMunmapped Within \
                   --outSAMtype BAM Unsorted\
                   --runThreadN ${task.cpus} \
-                  --outFileNamePrefix ${pair_id}-${STARgenome} \
+                  --outFileNamePrefix ${pair_id} \
                   --outSAMattributes NH HI AS nM NM MD jM jI XS MC ch vA vW vG \
                   --varVCFfile ${variants}
                   mkdir ${output}
@@ -284,8 +284,9 @@ process qualimap {
  }
 
 
+/*
  * MultiQC QC. 
-
+*/
 
 process tool_report {
 
@@ -297,27 +298,10 @@ process tool_report {
 
         script:
         """
-        make_tool_desc_for_multiqc.pl -l fastqc,star,skewer,qualimap,bedtools,samtools > tools_mqc.txt
+        make_tool_desc_for_multiqc.pl -l fastqc,star,bedtools,samtools,htseq > tools_mqc.txt
         """
 }
 
-
-process multiQC_report {
-    publishDir outputMultiQC,  mode: 'copy'
-
-    input:
-    file 'pre_config.yaml.txt' from multiconfig
-    file 'tools_mqc.txt' from tool_report_for_multiQC
-    
-    file '*' from Aln_folders_for_multiqc.mix(raw_fastqc_files, trimmed_fastqc_files,logTrimming_for_QC, QualiMap_for_multiQC).flatten().collect()
-    
-    output:
-    file("multiqc_report.html") into multiQC 
-
-    script:
-    def reporter = new Reporter(title:params.title, application:"RNA-seq", subtitle:params.subtitle, PI:params.PI, user:params.User, id:UCSCgenomeID, email:params.email,config_file:multiconfig)
-    reporter.makeMultiQCreport()
-}
 
 
 /*
@@ -370,6 +354,30 @@ process countTags {
     """
 }
 
+/*
+* 
+*/
+process multiQC_report {
+    publishDir outputMultiQC,  mode: 'copy'
+
+    input:
+    file (multiconfig)
+    file 'tools_mqc.txt' from tool_report_for_multiQC
+    
+    file '*' from Aln_folders_for_multiqc.mix(raw_fastqc_files, tag_counts_for_multiqc).flatten().collect()
+    
+    output:
+    file("multiqc_report.html") into multiQC 
+
+    script:
+    """
+    export LC_ALL=en_US.utf8
+    export LANG=en_US.utf8
+    make_conf_multiqc.sh \'${params.title}\' \'${params.subtitle}\' \'${params.PI}\' \'${params.User}\' \'${params.email}\' \'${UCSCgenomeID}\' ${multiconfig} 
+    multiqc -c config.yaml .
+    """
+
+}
 
 /*
  * Convert to BedGraph
