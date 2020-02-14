@@ -5,12 +5,15 @@ custom_logo_title: 'Bioinformatics Core Facility @ CRG'
 extra_fn_clean_trim: 
    - '-trimmed'
    - '_log'
+   - '_read1'
+   - '_read2'
 
 table_columns_visible:
-    FastQC:
-        percent_gc: False    
-        percent_duplicates: False
-        percent_assigned: False
+        FastQC: 
+                percent_gc: False    
+                percent_duplicates: False
+        HTseq Count:
+                percent_assigned: False
 module_order:
  - fastqc:
         name: 'FastQC'
@@ -19,3 +22,4 @@ module_order:
         info: 'FastQC results of raw reads'
  - star
  - htseq
+ - read_counts 

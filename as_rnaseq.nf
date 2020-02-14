@@ -76,10 +76,13 @@ outputfolder    = "${params.output}"
 outputQC        = "${outputfolder}/QC"
 outputMultiQC   = "${params.output}/multiQC"
 outputMapping   = "${outputfolder}/Alignments"
+outputvMapping  = "${outputfolder}/Allele_alignments"
 outputIndex     = "${outputfolder}/Index"
 trimmedReads    = "${outputfolder}/Trimmed"
 outputReport    = file("${outputMultiQC}/multiqc_report.html")
 outputCounts    = "${outputfolder}/Counts"
+outputsCounts   = "${outputfolder}/Allele_single_counts"
+outputmCounts   = "${outputfolder}/Allele_merged_Counts"
 UCSCgenomeID    = "${params.UCSCgenomeID}"
 tooldb          = file("conf_tools.txt")
 if( UCSCgenomeID == "" ) {        UCSCgenomeID = "custom"    }
@@ -197,18 +200,18 @@ process buildIndex {
 
     script:
     def genome_id = genome_file.simpleName
-    
+    def over = read_size-1
     """
     mkdir ${genome_id}
     if [ `echo ${genome_file} | grep ".gz"` ]; then 
         zcat ${genome_file} > `basename ${genome_file} .gz` 
         STAR --runMode genomeGenerate --genomeDir ${genome_id} --runThreadN ${task.cpus} \
-        --genomeFastaFiles `basename ${genome_file} .gz` --sjdbOverhang ${read_size} --sjdbGTFfile ${annotation_file} \
+        --genomeFastaFiles `basename ${genome_file} .gz` --sjdbOverhang ${over} --sjdbGTFfile ${annotation_file} \
         --outFileNamePrefix `basename ${genome_file} .gz` 
         rm `basename ${genome_file} .gz`
     else 
         STAR --runMode genomeGenerate --genomeDir ${genome_id} --runThreadN ${task.cpus} \
-        --genomeFastaFiles ${genome_file} --sjdbOverhang ${read_size} --sjdbGTFfile ${annotation_file} \
+        --genomeFastaFiles ${genome_file} --sjdbOverhang ${over} --sjdbGTFfile ${annotation_file} \
         --outFileNamePrefix ${genome_file} 
     fi
     """
@@ -224,8 +227,9 @@ process buildIndex {
 process mapping {
     tag { "${pair_id}" }
     label 'big_comp'
-    	//publishDir outputCounts, pattern: "STAR_${pair_id}/*ReadsPerGene.out.tab",  mode: 'copy'
-    	publishDir outputQC, pattern: "STAR_${pair_id}/*Log.final.out", mode: 'copy'
+    	publishDir outputCounts, pattern: "STAR_${pair_id}/*.out.tab",  mode: 'copy'
+    	publishDir outputMapping, pattern: "STAR_${pair_id}/*out.bam",  mode: 'copy'
+    	//publishDir outputQC, pattern: "STAR_${pair_id}/*Log.final.out", mode: 'copy'
 
         input:
         set pair_id, file(reads) from reads_for_mapping
@@ -249,11 +253,14 @@ process mapping {
                   --outSAMtype BAM Unsorted\
                   --runThreadN ${task.cpus} \
                   --outFileNamePrefix ${pair_id} \
+                  --quantMode GeneCounts \
                   --outSAMattributes NH HI AS nM NM MD jM jI XS MC ch vA vW vG \
-                  --varVCFfile ${variants}
+                  --varVCFfile ${variants} \
+                  --outFilterMismatchNmax 30 \
+                  --outFilterMismatchNoverReadLmax 0.12
                   mkdir ${output}
+                  mv *.out.tab ${output}/.
                   mv *Aligned* ${output}/.
-                  mv *SJ* ${output}/.
                   mv *Log* ${output}/. 
         """
         
@@ -298,7 +305,7 @@ process tool_report {
 
         script:
         """
-        make_tool_desc_for_multiqc.pl -l fastqc,star,bedtools,samtools,htseq > tools_mqc.txt
+        make_tool_desc_for_multiqc.pl -l fastqc,star,samtools,htseq > tools_mqc.txt
         """
 }
 
@@ -308,7 +315,7 @@ process tool_report {
  * Filter Bam files 
  */
 process filterBam {
-    //publishDir outputMapping, mode: 'copy'
+    publishDir outputvMapping, mode: 'copy'
     tag { pair_id }
 
     input:
@@ -337,7 +344,7 @@ process countTags {
 	set pair_id, file(bamfile) from allele_bams.transpose()
 
 	output:
-	file("*.counts") into tag_counts_for_multiqc       
+	set pair_id, file("*.counts") into tag_counts_for_grouping       
        
 	script:
 	def strandness = ""
@@ -348,23 +355,50 @@ process countTags {
     } else if (params.strandness=="reverse") {
          strandness = "reverse"
     }
-    script:
+
     """
     htseq-count -s ${strandness} -f bam ${bamfile} ${annotation_file} > `basename ${bamfile} .bam`.counts
     """
 }
 
+
+/*
+ * Counts tags with HTSEQ
+ */
+
+process groupCounts {
+	
+	publishDir outputmCounts, mode: 'copy', pattern: "*_group.counts"
+    tag { pair_id }
+
+	input:
+	file(annotation_file)
+	set pair_id, file("*") from tag_counts_for_grouping.groupTuple()
+
+	output:
+	set pair_id, file("*_group.counts") 
+	file("*_group.stats") into counts_stats_for_report
+       
+
+    script:
+    """
+	join_counts.sh ${pair_id}
+    """
+}
+
+
+
 /*
 * 
 */
+
 process multiQC_report {
     publishDir outputMultiQC,  mode: 'copy'
 
     input:
     file (multiconfig)
     file 'tools_mqc.txt' from tool_report_for_multiQC
-    
-    file '*' from Aln_folders_for_multiqc.mix(raw_fastqc_files, tag_counts_for_multiqc).flatten().collect()
+    file '*' from Aln_folders_for_multiqc.mix(raw_fastqc_files, counts_stats_for_report).flatten().collect()
     
     output:
     file("multiqc_report.html") into multiQC 
@@ -374,6 +408,14 @@ process multiQC_report {
     export LC_ALL=en_US.utf8
     export LANG=en_US.utf8
     make_conf_multiqc.sh \'${params.title}\' \'${params.subtitle}\' \'${params.PI}\' \'${params.User}\' \'${params.email}\' \'${UCSCgenomeID}\' ${multiconfig} 
+    
+    cat > counts_mqc.txt << EOL
+# id: read_counts
+# plot_type: 'bargraph'
+# section_name: 'Read counts on alleles'
+Sample	Reference	Alternate	Ambiguous
+EOL
+    grep -h -v "#" *.stats >> counts_mqc.txt
     multiqc -c config.yaml .
     """
 

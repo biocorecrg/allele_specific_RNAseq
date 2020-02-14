@@ -1,6 +1,6 @@
 #!/bin/env bash
 #
-# This script will cut the length of sequences within a fastq file
+# This script will extract filtered variants marked as PASS from a VCF file
 
 if [ x"$1" == x ]; then
 
