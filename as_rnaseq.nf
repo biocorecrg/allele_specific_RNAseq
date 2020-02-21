@@ -74,7 +74,7 @@ if( !variants_file.exists() ) exit 1, "Missing variations file: ${variants_file}
 subsize          = 5000000
 outputfolder    = "${params.output}"
 outputQC        = "${outputfolder}/QC"
-outputMultiQC   = "${params.output}/multiQC"
+outputMultiQC   = "${params.output}/Report"
 outputMapping   = "${outputfolder}/Alignments"
 outputvMapping  = "${outputfolder}/Allele_alignments"
 outputIndex     = "${outputfolder}/Index"
