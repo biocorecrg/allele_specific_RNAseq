@@ -227,8 +227,8 @@ process buildIndex {
 process mapping {
     tag { "${pair_id}" }
     label 'big_comp'
-    	publishDir outputCounts, pattern: "STAR_${pair_id}/*.out.tab",  mode: 'copy'
-    	publishDir outputMapping, pattern: "STAR_${pair_id}/*out.bam",  mode: 'copy'
+    	publishDir outputCounts, pattern: "${pair_id}/${pair_id}ReadsPerGene.out.tab",  mode: 'copy'
+    	publishDir outputMapping, pattern: "${pair_id}/*.out.bam",  mode: 'copy'
     	//publishDir outputQC, pattern: "STAR_${pair_id}/*Log.final.out", mode: 'copy'
 
         input:
@@ -237,7 +237,8 @@ process mapping {
         file(variants_file)
         
         output:
-        set pair_id, file("${pair_id}/*out.bam") into STARmappedBam_for_filtering
+        set pair_id, file("${pair_id}/${pair_id}ReadsPerGene.out.tab") into STAR_counts
+        set pair_id, file("${pair_id}/*.out.bam") into STARmappedBam_for_filtering
         file("${pair_id}") into Aln_folders_for_multiqc
 
         script:
@@ -336,7 +337,7 @@ process filterBam {
 
 process countTags {
 	
-	publishDir outputCounts, mode: 'copy'
+	publishDir outputsCounts, mode: 'copy'
     tag { bamfile }
 
 	input:
@@ -413,7 +414,7 @@ process multiQC_report {
 # id: read_counts
 # plot_type: 'bargraph'
 # section_name: 'Read counts on alleles'
-Sample	Reference	Alternate	Ambiguous
+Sample	Genotype A	Genotype B	Reference	Ambiguous
 EOL
     grep -h -v "#" *.stats >> counts_mqc.txt
     multiqc -c config.yaml .

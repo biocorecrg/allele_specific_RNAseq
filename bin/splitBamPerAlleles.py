@@ -25,7 +25,9 @@ def options_arg():
 	else: parser.print_help()
 	return (opts)
 def __main__ ():
-	myreads = parsefile(opts.input, opts.wotus)
+	myfastas = parsefile(opts.input, opts.wotus)
+	#longgenes = getlongest(myfastas)
+	#write_seqs(myfastas, longgenes, opts.wotus)
 
 
 #AUXILIAR MODULES
@@ -34,7 +36,7 @@ def parsefile(file, oprefix):
 	pp = pprint.PrettyPrinter(indent=4)
     # prepare out files
 	samfile = pysam.AlignmentFile(file, "rb")
-	ofiles = [oprefix + "_reference.bam", oprefix + "_alternative.bam", oprefix + "_ambiguous.bam"]
+	ofiles = [oprefix + "_ref.bam", oprefix + "_alleleA.bam", oprefix + "_alleleB.bam", oprefix + "_ambiguous.bam"]
 	pyoffiles = []
 	for ofile in ofiles:
 		pyoffiles.append(pysam.AlignmentFile(ofile, "wb", template=samfile))
@@ -47,23 +49,22 @@ def parsefile(file, oprefix):
 		if(read.has_tag("vW")):
 			if (read.get_tag("vW") == 1):
 				readnum = readnum +1
-				# Status 0 is reference, 1 is alternative, 2 is ambiguous
-				# no need for more checks if the first pair is ambiguous
-				if firstStatus != 2:
+				# No need for more checks if the first pair is ambiguous
+				if firstStatus != 3:
 					alleles = read.get_tag("vA").tolist()
 					alleles_count = Counter(alleles)
-					# If reference (no variant) is found
-					if 3 in alleles_count.keys():
-						status = 0
-					# If both alleles are found (i.e. it is ambiguous)
-						if 1 in alleles_count.keys():
-							status = 2
-					# If only allele two is found
-					elif 1 in alleles_count.keys():
+					# If allele one is found
+					if 1 in alleles_count.keys():
 						status = 1
-					# If pairs are assigned to different alleles they are ambiguous
-					if status != firstStatus and readnum == 2:
+					# If both alleles are found (it is ambiguous)
+						if 2 in alleles_count.keys():
+							status = 3
+					# If only allele two is found
+					elif 2 in alleles_count.keys():
 						status = 2
+					# If pairs are assigned to different alleles they are ambiguous
+					if status + firstStatus == 3:
+						status = 3
 #				print(read) 
 #				print(status)
 			# reset after second pair info and write the results
@@ -80,12 +81,32 @@ def parsefile(file, oprefix):
 	return
 
 
-
+def getlongest(seqs):
+	longest_genes = collections.defaultdict(dict) 
+	for geneid in seqs:
+		gsize = 0
+		mpepid = ""
+		for pepid in seqs[geneid]:
+			psize = len(seqs[geneid][pepid])
+			if (psize > gsize):
+				gsize = psize
+				mpepid = pepid
+		longest_genes[geneid] = mpepid
+	return longest_genes
+	
+def write_seqs(seqs, long, ofile):
+	f = open(ofile + "_longest.fa",'w')
+	for geneid in long:
+		protid = long[geneid]
+		longseq = seqs[geneid][protid]
+		fastseq =  ">" + protid + "|" + geneid + "\n" + textwrap.fill(longseq, 60) + "\n"
+		f.write(fastseq)
+	f.close()
+	#print(longseq)
 	
 
 #Calling
 opts = options_arg()
 if opts.input and opts.wotus:
 	__main__()
-
 
