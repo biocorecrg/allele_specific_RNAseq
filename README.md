@@ -29,7 +29,7 @@ cd allele_specific_RNAseq;
 nextflow run as_rnaseq.nf -bg > log
 ```
 
-optionally you might want to check your pipeline on Nextflow's [Tower](https://tower.nf/) website. You need to register using an istitutional mail and set the token in a variable as described.
+optionally you might want to check your pipeline on Nextflow's [Tower](https://tower.nf/) website. You need to register using an istitutional mail and set the token provided in a variable as described:
 
 ```bash
 export TOWER_ACCESS_TOKEN=<<<<<TOKEN NUMBER>>>>>>
