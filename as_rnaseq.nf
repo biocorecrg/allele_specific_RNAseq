@@ -79,6 +79,7 @@ outputMapping   = "${outputfolder}/Alignments"
 outputvMapping  = "${outputfolder}/Allele_alignments"
 outputIndex     = "${outputfolder}/Index"
 trimmedReads    = "${outputfolder}/Trimmed"
+outputProp		= "${outputfolder}/Proportions"
 outputReport    = file("${outputMultiQC}/multiqc_report.html")
 outputCounts    = "${outputfolder}/Counts"
 outputsCounts   = "${outputfolder}/Allele_single_counts"
@@ -363,8 +364,9 @@ process countTags {
 }
 
 
+
 /*
- * Counts tags with HTSEQ
+ * Group counts tags 
  */
 
 process groupCounts {
@@ -377,7 +379,7 @@ process groupCounts {
 	set pair_id, file("*") from tag_counts_for_grouping.groupTuple()
 
 	output:
-	set pair_id, file("*_group.counts") 
+	set pair_id, file("*_group.counts") into count_group_for_proportion
 	file("*_group.stats") into counts_stats_for_report
        
 
@@ -387,7 +389,34 @@ process groupCounts {
     """
 }
 
+/*
+ * Make proportions
+ */
 
+process makePropoportions {
+	tag { pair_id }
+	publishDir outputProp, mode: 'copy'
+
+	input:
+	set pair_id, file(group_count), file(read_count) from count_group_for_proportion.join(STAR_counts)
+	file(annotation_file)
+       
+	output:
+	file("${pair_id}_composite.txt")
+
+    script:
+	def strandness = ""
+    if (params.strandness=="unstranded") {
+    	strandness = "u"
+    } else if (params.strandness=="forward") {
+        strandness = "f"
+    } else if (params.strandness=="reverse") {
+         strandness = "r"
+    }
+    """
+	calc_prop.py -a ${group_count} -c ${read_count} -g ${annotation_file} -s "${strandness}" -o ${pair_id}_composite.txt
+    """
+}
 
 /*
 * 
@@ -422,64 +451,6 @@ EOL
 
 }
 
-/*
- * Convert to BedGraph
-
-
-process convertToBigWig {
-    tag { pair_id }
-    publishDir outputProfiles, mode: 'copy' 
-
-    input:
-    set pair_id, file(bamfile), file(indexfile) from bamFiles
-    file(starindex) from STARgenomeIndexForCoverage
-    val read_size from read_length_for_profile.map { it.trim().toInteger() }
-
-    output:
-    set pair_id, file("${pair_id}.bw") into bigWig_profiles
-    
-    script:
-    def misc = new Misc(input:bamfile, read_size:read_size, chr_size_file:"${starindex}/chrNameLength.txt", output:"${pair_id}.bw")
-    misc.makeAlnProfiles()
-    
-}
-
-
- * make UCSC genome Hub
-
-    process makeGenomeHub {
-        publishDir rootProfiles, mode: 'copy'
-
-        when:
-        UCSCgenomeID != ""
-    
-        output:
-        file "genomes.txt"
-        file "hub.txt"
-        
-        script: 
-        def reporter = new Reporter(id:UCSCgenomeID, title:params.title, subtitle:params.subtitle, email:params.email)
-        reporter.makeGenomeUcscHub()
-
-    }
-
-    process makeTrackDB {
-        publishDir outputProfiles, mode: 'copy'
-
-        when:
-        UCSCgenomeID != ""
-        
-        input:
-        file "*" from bigWig_profiles.collect()
-
-        output:
-        file "trackDb.txt"
-        
-        script: 
-        def reporter = new Reporter(id:"composite1", type:"bigWig", extension:"bw", , title:params.title, subtitle:params.subtitle, email:params.email)
-        reporter.makeBigWigTrackDB()        
-    }
- */
 
 // make named pipe 
 def unzipBash(filename) { 
