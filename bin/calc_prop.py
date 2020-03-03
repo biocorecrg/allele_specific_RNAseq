@@ -92,7 +92,7 @@ def parseGTF(file):
 
 def combineRes(count_res,allele_res,genames,wotus):
 	f = open(wotus,'w')
-	f.write("#gene_id" + "\tgene_name\tchromosome\t" + "A/(A+B)*Comp" + "\t" + "B/(A+B)*Comp" + "\n")
+	f.write("gene_id" + "\tgene_name\tchromosome\t" + "A/(A+B)*Comp" + "\t" + "B/(A+B)*Comp" + "\n")
 	for geneid in count_res:
 		comp_count = int(count_res[geneid])
 		gene_name = genames[geneid]["name"]
@@ -103,8 +103,8 @@ def combineRes(count_res,allele_res,genames,wotus):
 			calcAB = 0
 			calcBA = 0
 		else:
-			calcAB =  round(all_A/(all_A+all_B)*comp_count)
-			calcBA =  round(all_B/(all_A+all_B)*comp_count)
+			calcAB =  round(all_A/(all_A+all_B)*comp_count, 4)
+			calcBA =  round(all_B/(all_A+all_B)*comp_count, 4)
 		f.write(geneid + "\t" + gene_name + "\t" + gene_chr + "\t" + str(calcAB) + "\t" + str(calcBA) + "\n")
 	f.close()
 	
