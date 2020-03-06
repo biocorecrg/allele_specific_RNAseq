@@ -58,6 +58,42 @@ The parameters for running the pipeline are defined in the file **params.config*
 
 providing a real email address will deliver a mail with the multiqc report when the analysis is finished.
 
+## VCF file
+The VCF file was originally retrieved here:
+
+```bash
+wget -b ftp://ftp-mouse.sanger.ac.uk/REL-1505-SNPs_Indels/mgp.v5.merged.snps_all.dbSNP142.vcf.gz
+```
+
+and converted using the python script in the bin folder:
+
+```bash
+ python parseVCF.py -i mgp.v5.merged.snps_all.dbSNP142.vcf.gz -1 CAST_EiJ -2 129S1_SvImJ -o CAST_EiJ-129S1_SvImJ.vcf 
+ gzip CAST_EiJ-129S1_SvImJ.vcf 
+```
+
+This script will extract only the information about the required strains, filter for SNPs that have the "PASS" field and excluding the calls that are identical to the reference. 
+
+## Genome and annotation
+The genome must be provided as a gzipped or a plain fasta file, while the GTF must be a plain text. 
+
+## Files in the cluster
+They files are already in the cluster here (the version of the genome corresponds to the VCF file):
+
+```bash
+ls  /db/variants/mouse_strains/
+
+mgp.v5.merged.snps_all.dbSNP142.vcf.gz
+GRCm38_68.fa.gz
+Mus_musculus.GRCm38.68.gtf
+CAST_EiJ-129S1_SvImJ.vcf.gz
+```
+
+
+## Fastq reads
+Fastq paired ends reads can be either plain or gzipped. 
+
+
 ## Results
 The following folder will contain the final outputs:
 * Index: the indexed genome
