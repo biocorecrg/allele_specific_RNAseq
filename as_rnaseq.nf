@@ -319,16 +319,19 @@ process tool_report {
 process filterBam {
     publishDir outputvMapping, mode: 'copy'
     tag { pair_id }
+    label 'big_comp'
 
     input:
     set pair_id, file(bamfile) from STARmappedBam_for_filtering
 
     output:
-    set pair_id, file("${pair_id}_*.bam") into allele_bams
+    set pair_id, file("${pair_id}_*_s.bam") into allele_bams
+    set pair_id, file("${pair_id}_*_s.bam.bai") 
     
     script:
     """
 	splitBamPerAlleles.py -i ${bamfile} -o ${pair_id}
+	for i in ${pair_id}_*.bam; do samtools sort \$i -o `basename \$i .bam`_s.bam; samtools index `basename \$i .bam`_s.bam; done
     """
 }
 

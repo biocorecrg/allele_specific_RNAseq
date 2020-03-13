@@ -11,7 +11,7 @@ if [ x"$1" == x ]; then
 fi
 
 echo -e "gene_id\tgenoA\tgenoB\tref\tamb" > ${1}_group.counts
-join ${1}_alleleA.counts ${1}_alleleB.counts | join - ${1}_ref.counts | join - ${1}_ambiguous.counts | tr ' ' '\t' >> ${1}_group.counts 
+join ${1}_alleleA_s.counts ${1}_alleleB_s.counts | join - ${1}_ref_s.counts | join - ${1}_ambiguous_s.counts | tr ' ' '\t' >> ${1}_group.counts 
 
 echo -e "#fname\tgenoA\tgenoB\tref\tamb" "" > ${1}_group.stats
 
