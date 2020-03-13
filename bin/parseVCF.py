@@ -11,6 +11,7 @@ import pprint
 import copy 
 import subprocess
 import textwrap 
+import gzip 
 from collections import Counter
 
 
@@ -19,31 +20,44 @@ def options_arg():
 	usage = "usage: %prog -i <input vcf file> -o <output vcf file>"
 	parser = optparse.OptionParser(usage=usage)
 	parser.add_option('-i', '--input', help='Input vcf file', dest="input" )
+	parser.add_option('-1', '--species1', help='Input species id 1', dest="species1" )
+	parser.add_option('-2', '--species2', help='Input species id 2', dest="species2" )
 	parser.add_option('-o', '--output',help='ouput vcf File', dest="wotus" )
 	(opts,args) = parser.parse_args()
 	if opts.input and opts.wotus:pass
 	else: parser.print_help()
 	return (opts)
 def __main__ ():
-	myfastas = parsefile(opts.input, opts.wotus)
+	parsefile(opts.input, opts.wotus, opts.species1, opts.species2)
 	#longgenes = getlongest(myfastas)
 	#write_seqs(myfastas, longgenes, opts.wotus)
 
 
 #AUXILIAR MODULES
-def parsefile(file, ofile):
+def parsefile(file, ofile, sp1, sp2):
 	f = open(ofile,'w')
 	pp = pprint.PrettyPrinter(indent=4)
+	fieldnames = {}
 	# prepare files files
 	infile = open(file, 'r')
+	if (file.endswith('.gz')):
+		infile = gzip.open(file, 'rt')
 	for line in infile:
 		line = line.rstrip()
-		if (line[0]=="#"):
+		if (line[:2]=="##"):
+			f.write(line + "\n")
+		elif(line[0]=="#"):
+			fields = line.split('\t')
+			ind1 = fields.index(sp1)
+			ind2 = fields.index(sp2)
+			del(fields[10:])
+			fields[9] = sp1 + "|" + sp2
+			line = "\t".join(fields)
 			f.write(line + "\n")
 		else:
 			fields = line.split('\t')
-			genA = fields[9].split(":", 1)[0]
-			genB = fields[10].split(":", 1)[0]
+			genA = fields[ind1].split(":", 1)[0]
+			genB = fields[ind2].split(":", 1)[0]
 			# Exclude cases in which on one of two alleles there are no genotype calls
 			if (genA == './.' or genB == './.'):
 				continue
@@ -53,8 +67,8 @@ def parsefile(file, ofile):
 			else:
 				newGenA = parseGen(genA) 
 				newGenB = parseGen(genB) 
-				if (newGenA >= 0 and newGenB >= 0):
-					fields[10] = ""
+				if (newGenA >= 0 and newGenB >= 0 and fields[6] == "PASS"):
+					del(fields[10:])
 					fields[9] = str(newGenA) + "|" + str(newGenB)
 					line = "\t".join(fields)
 					f.write(line + "\n")
