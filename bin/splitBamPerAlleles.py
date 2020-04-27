@@ -19,90 +19,80 @@ def options_arg():
 	usage = "usage: %prog -i <input bam file> -o <OUTPUT PREFIX>"
 	parser = optparse.OptionParser(usage=usage)
 	parser.add_option('-i', '--input', help='Input bam file', dest="input" )
-	parser.add_option('-o', '--output',help='ouput prefix File', dest="wotus" )
+	parser.add_option('-m', '--minvar', help='Minimum number of variants', dest="minvar", default=1, type = int )
+	parser.add_option('-o', '--output', help='Ouput prefix File', dest="wotus" )
 	(opts,args) = parser.parse_args()
 	if opts.input and opts.wotus:pass
 	else: parser.print_help()
 	return (opts)
 def __main__ ():
-	myfastas = parsefile(opts.input, opts.wotus)
-	#longgenes = getlongest(myfastas)
-	#write_seqs(myfastas, longgenes, opts.wotus)
+	myfastas = parsefile(opts.input, opts.wotus, opts.minvar)
 
 
 #AUXILIAR MODULES
-def parsefile(file, oprefix):
+def parsefile(file, oprefix, minvar):
 	import pysam
 	pp = pprint.PrettyPrinter(indent=4)
     # prepare out files
 	samfile = pysam.AlignmentFile(file, "rb")
-	ofiles = [oprefix + "_ref.bam", oprefix + "_alleleA.bam", oprefix + "_alleleB.bam", oprefix + "_ambiguous.bam"]
+	ofiles = [oprefix + "_ref.bam", oprefix + "_alleleA.bam", oprefix + "_alleleB.bam", oprefix + "_ambiguous.bam", oprefix + "_cutoff.bam"]
 	pyoffiles = []
 	for ofile in ofiles:
 		pyoffiles.append(pysam.AlignmentFile(ofile, "wb", template=samfile))
-	firstStatus = 0
-	firstPair = ""
 	readnum = 0
 	status = 0
 	for read in samfile.fetch(until_eof=True):
 		# If the WASP filtering is passed:
 		if(read.has_tag("vW")):
 			if (read.get_tag("vW") == 1):
-				readnum = readnum +1
-				# No need for more checks if the first pair is ambiguous
-				if firstStatus != 3:
-					alleles = read.get_tag("vA").tolist()
-					alleles_count = Counter(alleles)
-					# If allele one is found
-					if 1 in alleles_count.keys():
-						status = 1
+				#readnum = readnum +1
+				# the vA TAG gives a string with three possible values:
+				# 1, 2, or three depending on how many SNPs and which genotype 
+				# they match, are detected in each pair (so 1,1 means 2 SNPs 
+				# matching genotype alle 1 considering both pairs) 
+				alleles = read.get_tag("vA").tolist()
+				alleles_count = Counter(alleles)
+				status = 0;
+				# If allele one is found
+				if 1 in alleles_count.keys():
+					status = 1
 					# If both alleles are found (it is ambiguous)
-						if 2 in alleles_count.keys():
-							status = 3
-					# If only allele two is found
-					elif 2 in alleles_count.keys():
-						status = 2
-					# If pairs are assigned to different alleles they are ambiguous
-					if status + firstStatus == 3:
+					if 2 in alleles_count.keys():
 						status = 3
-#				print(read) 
-#				print(status)
-			# reset after second pair info and write the results
-			if (readnum == 2):
-				pyoffiles[status].write(firstPair)
+				# If only allele two is found
+				elif 2 in alleles_count.keys():
+					status = 2
+				#check the threshold
+				if(status == 1):
+					if(alleles_count[1] < minvar):
+						status = 4
+				if(status == 2):
+					if(alleles_count[2] < minvar):
+						status = 4
+						
 				pyoffiles[status].write(read)
-				firstPair = ""
-				firstStatus = 0
-				readnum = 0
-				status = 0
-			else:
-				firstPair = read
-				firstStatus = status
 	return
 
+def count_allels(firstpair, secondpair):
+	filtered_counts = dict()
 
-def getlongest(seqs):
-	longest_genes = collections.defaultdict(dict) 
-	for geneid in seqs:
-		gsize = 0
-		mpepid = ""
-		for pepid in seqs[geneid]:
-			psize = len(seqs[geneid][pepid])
-			if (psize > gsize):
-				gsize = psize
-				mpepid = pepid
-		longest_genes[geneid] = mpepid
-	return longest_genes
+	alleles_f = firstpair.get_tag("vA").tolist()
+	alleles_s = secondpair.get_tag("vA").tolist()
+	alleles_fc = Counter(alleles_f)
+	alleles_sc = Counter(alleles_s)
+	#for all_name in set(alleles_fc) | set(alleles_sc):
+	#	filtered_counts[all_name]  = alleles_fc.get(all_name, 0) + alleles_sc.get(all_name, 0)
+	#print(filtered_counts)
 	
-def write_seqs(seqs, long, ofile):
-	f = open(ofile + "_longest.fa",'w')
-	for geneid in long:
-		protid = long[geneid]
-		longseq = seqs[geneid][protid]
-		fastseq =  ">" + protid + "|" + geneid + "\n" + textwrap.fill(longseq, 60) + "\n"
-		f.write(fastseq)
-	f.close()
-	#print(longseq)
+#	alleles_counts = Counter(alleles)
+#	for variant_type in alleles_counts:
+#		alleles_count = alleles_counts[variant_type]
+#		if (alleles_count >= minvar):
+#			filtered_counts[variant_type] = alleles_count
+	return filtered_counts
+
+	
+
 	
 
 #Calling

@@ -37,6 +37,7 @@ annotation                    : ${params.annotation}
 strandness                    : ${params.strandness}
 variants                      : ${params.variants}
 single (YES or NO)            : ${params.single}
+varcut						  : ${params.varcut}
 output (output folder)        : ${params.output}
 UCSCgenomeID genome ID 
 for UCSC hub (optional)       : ${params.UCSCgenomeID}
@@ -330,7 +331,7 @@ process filterBam {
     
     script:
     """
-	splitBamPerAlleles.py -i ${bamfile} -o ${pair_id}
+	splitBamPerAlleles.py -i ${bamfile} -o ${pair_id} -m ${params.varcut}
 	for i in ${pair_id}_*.bam; do samtools sort \$i -o `basename \$i .bam`_s.bam; samtools index `basename \$i .bam`_s.bam; done
     """
 }
