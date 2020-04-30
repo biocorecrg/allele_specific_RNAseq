@@ -92,7 +92,7 @@ def parseGTF(file):
 
 def combineRes(count_res,allele_res,genames,wotus):
 	f = open(wotus,'w')
-	f.write("gene_id" + "\tgene_name\tchromosome\t" + "A/(A+B)*Comp" + "\t" + "B/(A+B)*Comp" + "\n")
+	f.write("gene_id" + "\tgene_name\tchromosome\t" + "A/(A+B)" + "\t" + "B/(A+B)" + "\t" + "A/(A+B)*Comp" + "\t" + "B/(A+B)*Comp" + "\n")
 	for geneid in count_res:
 		comp_count = int(count_res[geneid])
 		gene_name = genames[geneid]["name"]
@@ -100,12 +100,16 @@ def combineRes(count_res,allele_res,genames,wotus):
 		all_A = int(allele_res[geneid]["A"])
 		all_B = int(allele_res[geneid]["B"])
 		if (all_A == 0 and all_B == 0):
+			propAB = 0
+			propBA = 0
 			calcAB = 0
 			calcBA = 0
 		else:
-			calcAB =  round(all_A/(all_A+all_B)*comp_count, 4)
-			calcBA =  round(all_B/(all_A+all_B)*comp_count, 4)
-		f.write(geneid + "\t" + gene_name + "\t" + gene_chr + "\t" + str(calcAB) + "\t" + str(calcBA) + "\n")
+			propAB =  all_A/(all_A+all_B)
+			propBA =  all_B/(all_A+all_B)
+			calcAB = round((propAB*comp_count), 4)
+			calcBA = round((propBA*comp_count), 4)
+		f.write(geneid + "\t" + gene_name + "\t" + gene_chr + "\t" + str(propAB) + "\t" + str(propBA) + "\t" + str(calcAB) + "\t" + str(calcBA) + "\n")
 	f.close()
 	
 

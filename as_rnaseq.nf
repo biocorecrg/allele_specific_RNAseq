@@ -406,7 +406,7 @@ process makePropoportions {
 	file(annotation_file)
        
 	output:
-	file("${pair_id}_composite.txt")
+	file("${pair_id}_composite_cut${params.varcut}.txt")
 
     script:
 	def strandness = ""
@@ -418,7 +418,7 @@ process makePropoportions {
          strandness = "r"
     }
     """
-	calc_prop.py -a ${group_count} -c ${read_count} -g ${annotation_file} -s "${strandness}" -o ${pair_id}_composite.txt
+	calc_prop.py -a ${group_count} -c ${read_count} -g ${annotation_file} -s "${strandness}" -o ${pair_id}_composite_cut${params.varcut}.txt
     """
 }
 
