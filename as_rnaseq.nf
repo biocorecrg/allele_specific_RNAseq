@@ -35,6 +35,7 @@ reads                         : ${params.reads}
 genome                        : ${params.genome}
 annotation                    : ${params.annotation}
 strandness                    : ${params.strandness}
+indexfolder                   : ${params.indexfolder}
 variants                      : ${params.variants}
 single (YES or NO)            : ${params.single}
 varcut						  : ${params.varcut}
@@ -77,14 +78,13 @@ outputfolder    = "${params.output}"
 outputQC        = "${outputfolder}/QC"
 outputMultiQC   = "${params.output}/Report"
 outputMapping   = "${outputfolder}/Alignments"
-outputvMapping  = "${outputfolder}/Allele_alignments"
-outputIndex     = "${outputfolder}/Index"
+outputvMapping  = "${outputfolder}/cut_${params.varcut}/Allele_alignments"
 trimmedReads    = "${outputfolder}/Trimmed"
-outputProp		= "${outputfolder}/Proportions"
+outputProp		= "${outputfolder}/cut_${params.varcut}/Proportions"
 outputReport    = file("${outputMultiQC}/multiqc_report.html")
 outputCounts    = "${outputfolder}/Counts"
-outputsCounts   = "${outputfolder}/Allele_single_counts"
-outputmCounts   = "${outputfolder}/Allele_merged_Counts"
+outputsCounts   = "${outputfolder}/cut_${params.varcut}/Allele_single_counts"
+outputmCounts   = "${outputfolder}/cut_${params.varcut}/Allele_merged_Counts"
 UCSCgenomeID    = "${params.UCSCgenomeID}"
 tooldb          = file("conf_tools.txt")
 if( UCSCgenomeID == "" ) {        UCSCgenomeID = "custom"    }
@@ -187,7 +187,7 @@ process getReadLength {
  */
  
 process buildIndex {
-    publishDir outputIndex
+    storeDir "${params.indexfolder}"
     label 'big_comp'
     tag { "${genome_file} with ${annotation_file}" }
     
@@ -406,7 +406,7 @@ process makePropoportions {
 	file(annotation_file)
        
 	output:
-	file("${pair_id}_composite_cut${params.varcut}.txt")
+	file("${pair_id}_composite.txt")
 
     script:
 	def strandness = ""
@@ -418,7 +418,7 @@ process makePropoportions {
          strandness = "r"
     }
     """
-	calc_prop.py -a ${group_count} -c ${read_count} -g ${annotation_file} -s "${strandness}" -o ${pair_id}_composite_cut${params.varcut}.txt
+	calc_prop.py -a ${group_count} -c ${read_count} -g ${annotation_file} -s "${strandness}" -o ${pair_id}_composite.txt
     """
 }
 
