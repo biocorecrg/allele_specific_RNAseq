@@ -458,7 +458,7 @@ EOL
 
 // make named pipe 
 def unzipBash(filename) { 
-    cmd = filename.toString()
+    def cmd = filename.toString()
     if (cmd[-3..-1] == ".gz") {
     	cmd = "<(zcat ${filename})"
     }
@@ -467,7 +467,7 @@ def unzipBash(filename) {
 
 // extract unzip pipe 
 def getUnzipName(filename) { 
-    name = filename.toString()
+    def name = filename.toString()
     if (name[-3..-1] == ".gz") {
     	name = name.baseName
     }
