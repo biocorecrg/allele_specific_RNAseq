@@ -12,6 +12,7 @@ import copy
 import subprocess
 import textwrap 
 import gzip 
+import os 
 from collections import Counter
 
 
@@ -22,16 +23,17 @@ def options_arg():
 	parser.add_option('-i', '--input', help='Input vcf file', dest="input" )
 	parser.add_option('-1', '--species1', help='Input species id 1', dest="species1" )
 	parser.add_option('-2', '--species2', help='Input species id 2', dest="species2" )
+	parser.add_option('-g', '--genome', help='Genome file in fasta format', dest="fasta" )
 	parser.add_option('-o', '--output',help='ouput vcf File', dest="wotus" )
 	(opts,args) = parser.parse_args()
-	if opts.input and opts.wotus:pass
+	if opts.input and opts.fasta and opts.wotus:pass
 	else: parser.print_help()
 	return (opts)
 def __main__ ():
-	parsefile(opts.input, opts.wotus, opts.species1, opts.species2)
-	#longgenes = getlongest(myfastas)
-	#write_seqs(myfastas, longgenes, opts.wotus)
-
+	#parsefile(opts.input, opts.wotus, opts.species1, opts.species2)
+	os.system("bedtools maskfasta -fi " + opts.fasta + " -bed " + opts.wotus + " -fo " + opts.fasta + ".masked")
+	os.system("gzip "+ opts.fasta + ".masked") 
+        os.system("gzip "+ opts.wotus) 
 
 #AUXILIAR MODULES
 def parsefile(file, ofile, sp1, sp2):
@@ -56,8 +58,8 @@ def parsefile(file, ofile, sp1, sp2):
 			f.write(line + "\n")
 		else:
 			fields = line.split('\t')
-			genA = fields[ind1].split(":", 1)[0]
-			genB = fields[ind2].split(":", 1)[0]
+			genA = getGen(fields[ind1])
+			genB = getGen(fields[ind2])
 			# Exclude cases in which on one of two alleles there are no genotype calls
 			if (genA == './.' or genB == './.'):
 				continue
@@ -67,15 +69,33 @@ def parsefile(file, ofile, sp1, sp2):
 			else:
 				newGenA = parseGen(genA) 
 				newGenB = parseGen(genB) 
-				if (newGenA >= 0 and newGenB >= 0 and fields[6] == "PASS"):
+				if (newGenA == 1 and newGenB == 1):
+					continue
+				if (newGenA >= 0 and newGenB >= 0):
 					del(fields[10:])
 					fields[9] = str(newGenA) + "|" + str(newGenB)
 					line = "\t".join(fields)
-					f.write(line + "\n")
+					other_line = getOtherSnp(fields)
+					f.write(line + "\n" + other_line + "\n")
 	infile.close()
 	f.close()
 	return
 
+def getOtherSnp(fields):
+	ids = fields[9].split("|")
+	fields[9] = ids[1] + "|" + ids[0]
+	fields[2] = fields[2] + "_2"
+	fields[4] = fields[3]
+	line = "\t".join(fields)
+	return(line)
+
+def getGen(geninfo):
+	info = geninfo.split(":")
+	gen = "./."
+	passTag = info[-1]
+	if (passTag == '1'):
+		gen = info[0]
+	return gen
 
 def parseGen(genotype):
 	newGen = -1

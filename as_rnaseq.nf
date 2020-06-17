@@ -253,7 +253,7 @@ process mapping {
                   \$gzipped \
                   --waspOutputMode SAMtag \
                   --outSAMunmapped Within \
-                  --outSAMtype BAM Unsorted\
+                  --outSAMtype BAM SortedByCoordinate \
                   --runThreadN ${task.cpus} \
                   --outFileNamePrefix ${pair_id} \
                   --quantMode GeneCounts \

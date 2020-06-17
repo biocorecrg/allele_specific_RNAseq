@@ -10,6 +10,11 @@ ARG MULTIQC_VERSION=1.8
 ARG SAMTOOLS_VERSION=1.10
 ARG TOOL_MULTIQC_VERSION=1.1
 ARG HTSEQ_VERSION=0.11.1
+ARG BEDTOOLS_VERSION=2.29.2
+
+#INSTALLING BEDTOOLS
+RUN bash -c 'curl -k -L https://github.com/arq5x/bedtools2/releases/download/v${BEDTOOLS_VERSION}/bedtools.static.binary > /usr/local/bin/bedtools'
+RUN chmod +x /usr/local/bin/bedtools
 
 #INSTALLING FASTQC
 RUN bash -c 'curl -k -L https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${FASTQC_VERSION}.zip > fastqc.zip'
