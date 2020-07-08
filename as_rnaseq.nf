@@ -230,7 +230,7 @@ process mapping {
     tag { "${pair_id}" }
     label 'big_comp'
     	publishDir outputCounts, pattern: "${pair_id}/${pair_id}ReadsPerGene.out.tab",  mode: 'copy'
-    	publishDir outputMapping, pattern: "${pair_id}/*.out.bam",  mode: 'copy'
+    	publishDir outputMapping, pattern: "${pair_id}/*.out.bam*",  mode: 'copy'
     	//publishDir outputQC, pattern: "STAR_${pair_id}/*Log.final.out", mode: 'copy'
 
         input:
@@ -241,6 +241,7 @@ process mapping {
         output:
         set pair_id, file("${pair_id}/${pair_id}ReadsPerGene.out.tab") into STAR_counts
         set pair_id, file("${pair_id}/*.out.bam") into STARmappedBam_for_filtering
+        file("${pair_id}/*.out.bam.bai")
         file("${pair_id}") into Aln_folders_for_multiqc
 
         script:
@@ -258,13 +259,13 @@ process mapping {
                   --outFileNamePrefix ${pair_id} \
                   --quantMode GeneCounts \
                   --outSAMattributes NH HI AS nM NM MD jM jI XS MC ch vA vW vG \
-                  --varVCFfile ${variants} \
-                  --outFilterMismatchNmax 30 \
-                  --outFilterMismatchNoverReadLmax 0.12
+                  --varVCFfile ${variants};
                   mkdir ${output}
-                  mv *.out.tab ${output}/.
-                  mv *Aligned* ${output}/.
-                  mv *Log* ${output}/. 
+                  mv *.out.tab ${output}/
+                  mv *Aligned* ${output}/
+                  mv *Log* ${output}/
+ 
+        	samtools index ${pair_id}/*.out.bam
         """
         
 }
