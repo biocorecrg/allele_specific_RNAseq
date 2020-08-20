@@ -32,7 +32,6 @@ BIOCORE@CRG RNAseq - N F  ~  version ${version}
 BIOCORE@CRG Allele Specific RNAseq - N F  ~  version ${version}
 ====================================================
 vcffile                       : ${params.vcffile}
-vcfindex                      : ${params.vcfindex}
 speciesA                      : ${params.speciesA}
 speciesB                      : ${params.speciesB}
 genome                        : ${params.genome}
@@ -56,28 +55,25 @@ if (params.resume) exit 1, "Are you making the classical --resume typo? Be caref
  
 genome_file = file(params.genome)
 variants_file = file(params.vcffile)
-variants_index = file(params.vcfindex)
 
 if( !genome_file.exists() ) exit 1, "Missing genome file: ${genome_file}"
 if( !variants_file.exists() ) exit 1, "Missing variations file: ${variants_file}"
-if( !variants_index.exists() ) exit 1, "Missing variations index: ${variants_index}"
 if( !params.speciesA ) exit 1, "Missing speciesA parameter"
 if( !params.speciesB ) exit 1, "Missing speciesB parameter"
 
 /*
- * Run FastQC on raw data
+ * Run parseVCF on raw data
 */
 process parseVCF {
     tag { variants_file }
-    publishDir "."
+    publishDir "filteredVCF",  mode: 'copy'
 
     input:
     file(genome_file)
     file(variants_file)
-    file(variants_index)
     
     output:
-    file(params.outvcf) 
+    file("*.gz") 
 
     script:
     """
