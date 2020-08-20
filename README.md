@@ -87,8 +87,20 @@ The parameters for running the pipeline are defined in the file **params.config*
 providing a real email address will deliver a mail with the multiqc report when the analysis is finished.
 
 
-## Fastq reads
+### Fastq reads
 Fastq paired ends reads can be either plain or gzipped. 
+### Genome
+Gzipped fasta file of the genome obtained running makeAnno
+### annotation
+GTF file
+### variants
+Gzipped VCF file obtained running makeAnno
+### single
+YES: single end reads. NO: paired ends
+### varcut
+Number of SNP needed for assigning a read to a variant. 
+
+
 
 ## Results
 The following folder will contain the final outputs:
