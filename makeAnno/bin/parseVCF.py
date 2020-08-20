@@ -30,10 +30,10 @@ def options_arg():
 	else: parser.print_help()
 	return (opts)
 def __main__ ():
-	#parsefile(opts.input, opts.wotus, opts.species1, opts.species2)
+	parsefile(opts.input, opts.wotus, opts.species1, opts.species2)
 	os.system("bedtools maskfasta -fi " + opts.fasta + " -bed " + opts.wotus + " -fo " + opts.fasta + ".masked")
 	os.system("gzip "+ opts.fasta + ".masked") 
-        os.system("gzip "+ opts.wotus) 
+	os.system("gzip "+ opts.wotus)
 
 #AUXILIAR MODULES
 def parsefile(file, ofile, sp1, sp2):
