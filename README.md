@@ -70,7 +70,7 @@ The parameters for running the pipeline are defined in the file **params.config*
 |parameter|value|
 |:---:|:---:|
 |reads |$baseDir/test/*_{1,2}.fastq.gz|
-|genome |$baseDir/test/GRCm38_68_19.fa.gz|
+|genome |$baseDir/test/GRCm38_68_19.masked.fa.gz|
 |annotation |$baseDir/test/Mus_musculus.GRCm38.68_19.gtf|
 |strandness |reverse|
 |variants |$baseDir/test/19_filt.vcf.gz| 
@@ -90,7 +90,7 @@ providing a real email address will deliver a mail with the multiqc report when 
 ### Fastq reads
 Fastq paired ends reads can be either plain or gzipped. 
 ### Genome
-Gzipped fasta file of the genome obtained running makeAnno
+Gzipped masked fasta file of the genome obtained running makeAnno
 ### annotation
 GTF file
 ### variants
