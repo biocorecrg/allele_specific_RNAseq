@@ -39,34 +39,16 @@ wget ftp://ftp-mouse.sanger.ac.uk/ref/GRCm38_68.fa
 
 and the annotation from Ensembl. We used the version Mus_musculus.GRCm38.68 not available in Ensembl archive.
 
-Then you can donwloand the singularity image manually that contains the executables for running the script
+The module **makeAnno** can be used for generating a VCF file with SNP for the interesting species and a genome with SNP position masked with Ns.
 
-```
-singularity pull docker://biocorecrg/asrnaseq:0.2
-
-singularity exec -e asrnaseq_0.2.sif python parseVCF.py -h
-Usage: parseVCF.py -i <input vcf file> -o <output vcf file>
-
-Options:
-  -h, --help            show this help message and exit
-  -i INPUT, --input=INPUT
-                        Input vcf file
-  -1 SPECIES1, --species1=SPECIES1
-                        Input species id 1
-  -2 SPECIES2, --species2=SPECIES2
-                        Input species id 2
-  -g FASTA, --genome=FASTA
-                        Genome file in fasta format
-  -o WOTUS, --output=WOTUS
-                        ouput vcf File
-```
-
-This script will make a new VCF with SNP for indicated species and mask the genome accordingly. 
-
+For using the module:
 
 ```bash
-singularity exec -e asrnaseq_0.2.sif parseVCF.py -1 CAST_EiJ -2 129S1_SvImJ -i mgp.v5.merged.snps_all.dbSNP142.vcf.gz -o CAST_EiJ-129S1_SvImJ.vcf -g GRCm38_68.fa
+cd makeAnno
+nextflow run make_anno.nf -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB 129S1_SvImJ --genome GRCm38_68.fa --outvcf CAST_EiJ-129S1_SvImJ.vcf > log
 ```
+
+This can take some time, likely more than 6 hours. 
 
 ## Run the pipeline
 ```bash
@@ -88,7 +70,7 @@ The parameters for running the pipeline are defined in the file **params.config*
 |parameter|value|
 |:---:|:---:|
 |reads |$baseDir/test/*_{1,2}.fastq.gz|
-|genome |$baseDir/test/GRCm38_68_19.fa.gz|
+|genome |$baseDir/test/GRCm38_68_19.masked.fa.gz|
 |annotation |$baseDir/test/Mus_musculus.GRCm38.68_19.gtf|
 |strandness |reverse|
 |variants |$baseDir/test/19_filt.vcf.gz| 
@@ -105,8 +87,20 @@ The parameters for running the pipeline are defined in the file **params.config*
 providing a real email address will deliver a mail with the multiqc report when the analysis is finished.
 
 
-## Fastq reads
+### Fastq reads
 Fastq paired ends reads can be either plain or gzipped. 
+### Genome
+Gzipped masked fasta file of the genome obtained running makeAnno
+### annotation
+GTF file
+### variants
+Gzipped VCF file obtained running makeAnno
+### single
+YES: single end reads. NO: paired ends
+### varcut
+Number of SNP needed for assigning a read to a variant. 
+
+
 
 ## Results
 The following folder will contain the final outputs:
