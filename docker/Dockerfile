@@ -11,6 +11,7 @@ ARG SAMTOOLS_VERSION=1.10
 ARG TOOL_MULTIQC_VERSION=1.1
 ARG HTSEQ_VERSION=0.11.1
 ARG BEDTOOLS_VERSION=2.29.2
+ARG HTSLIB_VERSION=1.10.2
 
 #INSTALLING BEDTOOLS
 RUN bash -c 'curl -k -L https://github.com/arq5x/bedtools2/releases/download/v${BEDTOOLS_VERSION}/bedtools.static.binary > /usr/local/bin/bedtools'
@@ -43,6 +44,12 @@ RUN bash -c 'curl -k -L https://github.com/samtools/samtools/releases/download/$
 RUN tar -jvxf samtools.tar.bz2
 RUN cd samtools-${SAMTOOLS_VERSION}; ./configure; make; make install; cd ../
 RUN rm samtools.tar.bz2
+
+#INSTALLING htslib
+RUN bash -c 'curl -k -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 > htslib.tar.bz2'
+RUN tar -jvxf htslib.tar.bz2
+RUN cd htslib-${HTSLIB_VERSION}; ./configure; make; make install; cd ../
+RUN rm htslib.tar.bz2
 
 #Installing kenttools
 RUN yum install -y libpng12

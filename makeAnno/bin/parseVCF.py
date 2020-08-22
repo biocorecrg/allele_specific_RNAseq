@@ -31,10 +31,15 @@ def options_arg():
 	return (opts)
 def __main__ ():
 	parsefile(opts.input, opts.wotus, opts.species1, opts.species2)
+	os.system("bgzip -c "+ opts.wotus + "> " + opts.wotus + ".gz")
+	#os.system("rm " + opts.wotus + ".gz")
+	os.system("samtools faidx "+ opts.fasta)
+	os.system("tabix -p vcf "+ opts.wotus + ".gz")
+	print("bedtools maskfasta -fi " + opts.fasta + " -bed " + opts.wotus + ".gz -fo " + opts.fasta + ".masked")
+	
 	os.system("bedtools maskfasta -fi " + opts.fasta + " -bed " + opts.wotus + " -fo " + opts.fasta + ".masked")
-	os.system("gzip "+ opts.fasta + ".masked") 
-	os.system("gzip "+ opts.wotus)
-
+	#os.system("rm " + opts.wotus)
+	#os.system("gzip "+ opts.fasta + ".masked")
 #AUXILIAR MODULES
 def parsefile(file, ofile, sp1, sp2):
 	f = open(ofile,'w')
