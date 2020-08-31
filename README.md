@@ -48,7 +48,7 @@ cd makeAnno
 nextflow run make_anno.nf -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB 129S1_SvImJ --genome GRCm38_68.fa --outvcf CAST_EiJ-129S1_SvImJ.vcf > log
 ```
 
-This can take some time, likely more than 6 hours. 
+This can take some memory for masking the genome.
 
 ## Run the pipeline
 ```bash
