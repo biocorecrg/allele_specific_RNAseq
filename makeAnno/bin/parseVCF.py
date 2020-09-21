@@ -38,8 +38,8 @@ def __main__ ():
 	print("bedtools maskfasta -fi " + opts.fasta + " -bed " + opts.wotus + ".gz -fo " + opts.fasta + ".masked")
 	
 	os.system("bedtools maskfasta -fi " + opts.fasta + " -bed " + opts.wotus + " -fo " + opts.fasta + ".masked")
-	#os.system("rm " + opts.wotus)
-	#os.system("gzip "+ opts.fasta + ".masked")
+	os.system("rm " + opts.wotus)
+	os.system("gzip "+ opts.fasta + ".masked")
 #AUXILIAR MODULES
 def parsefile(file, ofile, sp1, sp2):
 	f = open(ofile,'w')
