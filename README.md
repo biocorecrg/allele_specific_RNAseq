@@ -28,8 +28,8 @@ git clone --depth 1 git@github.com:biocorecrg/allele_specific_RNAseq.git
 You need to extract the SNP information from the global VCF file, so first of all you need to download the VCF file with the index:
 
 ```bash
-wget ftp://ftp-mouse.sanger.ac.uk/REL-1505-SNPs_Indels/mgp.v5.merged.indels.dbSNP142.normed.vcf.gz
-wget ftp://ftp-mouse.sanger.ac.uk/REL-1505-SNPs_Indels/mgp.v5.merged.indels.dbSNP142.normed.vcf.gz.tbi
+wget ftp://ftp-mouse.sanger.ac.uk/REL-1505-SNPs_Indels/mgp.v5.merged.snps_all.dbSNP142.normed.vcf.gz
+wget ftp://ftp-mouse.sanger.ac.uk/REL-1505-SNPs_Indels/mgp.v5.merged.snps_all.dbSNP142.normed.vcf.gz.tbi
 ```
 
 then the reference genome:
