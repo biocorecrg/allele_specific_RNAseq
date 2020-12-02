@@ -24,6 +24,15 @@ You need to install either [Docker](https://docs.docker.com/install/) or [Singul
 git clone --depth 1 git@github.com:biocorecrg/allele_specific_RNAseq.git
 ```
 
+or
+
+```
+git clone --depth 1 https://github.com/biocorecrg/allele_specific_RNAseq.git 
+```
+
+depending on your GitHub configuration.
+
+
 ## Prepare the input data
 You need to extract the SNP information from the global VCF file, so first of all you need to download the VCF file with the index:
 
