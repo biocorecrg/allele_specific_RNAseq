@@ -19,19 +19,6 @@ Finally a report is generated using **multiQC**[6] that summarize the results of
 
 ## Install
 You need to install either [Docker](https://docs.docker.com/install/) or [Singularity](https://sylabs.io/guides/3.1/user-guide/installation.html) and [Nextflow](https://www.nextflow.io/docs/latest/getstarted.html). 
-In the cluster you can just add to your .bashrc
-
-```
-vi $HOME/.bashrc
-```
-
-and add
-
-```
-module use /software/as/el7.2/EasyBuild/CRG/modules/all
-module load Singularity/3.2.1
-
-```
 
 
 Then you can clone the repository:
@@ -62,11 +49,7 @@ then the reference genome:
 wget ftp://ftp-mouse.sanger.ac.uk/ref/GRCm38_68.fa
 ```
 
-and the annotation from Ensembl. We used the version Mus_musculus.GRCm38.68 not available in Ensembl archive. You can use it the one here in the cluster:
-
-```
-/db/ensembl/release-68/mus_musculus/gtf/Mus_musculus.GRCm38.68.gtf.gz
-```
+and the annotation from Ensembl. We used the version Mus_musculus.GRCm38.68 not available in Ensembl archive. 
 
 The module **makeAnno** can be used for generating a VCF file with SNP for the interesting species and a genome with SNP position masked with Ns.
 
