@@ -52,5 +52,21 @@ You have:
 * Mouse reference genome: Mus_musculus.GRCm38.68.dna.chrom.fa.gz
 * Mouse annotation: Mus_musculus.GRCm38.68.gtf.gz
 
-The parameters for running the pipeline are defined in the file **params.config** that can be changed accordingly.
+The parameters for running the pipeline are defined in the file **params.crg.config**. You can copy this file and renaming it params.config and change it accordingly. 
+
+In particular you need to change only the following parameters:  
+
+```
+	reads        = "/test/*_{1,2}.fastq.gz"
+	strandness   = "reverse"
+  output       = "$baseDir/output_test"
+	single       = "NO"
+	varcut       = 1
+  title	     = "Allele specific RNAseq project"	
+	subtitle     = "This is my wonderful RNA experiment"	
+	PI           = "Luca Cozzuto"	
+	User	     = "Luca Cozzuto"
+	email	     = "mymail@mydomain.eu"	
+```
+
 
