@@ -103,6 +103,8 @@ providing a real email address will deliver a mail with the multiqc report when 
 Fastq paired ends reads can be either plain or gzipped. 
 ### Genome
 Gzipped masked fasta file of the genome obtained running makeAnno
+### Strandness
+It can be either "unstranded" or "forward" or "reverse". It depends on the kind of sequencing.
 ### annotation
 GTF file
 ### variants
@@ -124,7 +126,7 @@ The following folder will contain the final outputs:
 * cut_N *  A folder that is generated for each SNP cut off chosen containing the following sub-folders:
  * Allele_single_counts: containing the count per gene per sample and single alleles
  * Allele_merged_Counts:  containing the count per gene per allele in a single file for each sample
- * Counts: composite counts per gene per sample. No distincion between alleles
+ * Counts: composite counts per gene per sample. No distincion between alleles. Four fields: gene id, tot counts considering the sequencing unstranded, tot counts considering the sequencind done on the forward strand, tot counts considering reverse strand. 
  * Proportions: for each sample the read count per allele are divided for the sum of counts of the variants and multiplied for the composite count.
 
 ```
