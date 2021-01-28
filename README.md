@@ -122,12 +122,12 @@ The following folder will contain the final outputs:
 * QC: containing fastQC results
 * Alignments: containing sorted BAM files as they were from normal bulk RNAseq
 * Report: A detailed report for the pipeline run, that will be sent via email.
-* Allele_alignments: containing BAM files containing reads with variants marked as: *alleleA*, *alleleB*, *ref* and *ambiguous*
+* Allele_alignments: containing BAM files containing reads with variants marked as: *alleleA*, *alleleB*, *ref* and *ambiguous*. The count is done considering the strand protocol used and specified as a parameter.
 * cut_N *  A folder that is generated for each SNP cut off chosen containing the following sub-folders:
- * Allele_single_counts: containing the count per gene per sample and single alleles
- * Allele_merged_Counts:  containing the count per gene per allele in a single file for each sample
- * Counts: composite counts per gene per sample. No distincion between alleles. Four fields: gene id, tot counts considering the sequencing unstranded, tot counts considering the sequencind done on the forward strand, tot counts considering reverse strand. 
- * Proportions: for each sample the read count per allele are divided for the sum of counts of the variants and multiplied for the composite count.
+ * Allele_single_counts: containing the count per gene per sample and single alleles. The count is done considering the strand protocol used and specified as a parameter.
+ * Allele_merged_Counts:  containing the count per gene per allele in a single file for each sample. The count is done considering the strand protocol used and specified as a parameter.
+ * Counts: composite counts per gene per sample. No distincion between alleles. Four fields: gene id, tot counts considering the sequencing unstranded, tot counts considering the sequencind done on the forward strand, tot counts considering reverse strand. This information is useful for validating the strand specific protocol used in the sequencing step.
+ * Proportions: for each sample the read count per allele are divided for the sum of counts of the variants and multiplied for the composite count. The count is done considering the strand protocol used and specified as a parameter.
 
 ```
 propA = alleleA/(alleleA+alleleB) * composite 
