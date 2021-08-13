@@ -1,4 +1,4 @@
-# Allele specific RNAseq pipeline
+# Allele-specific RNA-seq pipeline
 [![Docker Build Status](https://img.shields.io/docker/automated/biocorecrg/asrnaseq.svg)](https://cloud.docker.com/u/biocorecrg/repository/docker/biocorecrg/asrnaseq/builds)
 [![Nextflow version](https://img.shields.io/badge/Nextflow-20.01.0-brightgreen)](https://www.nextflow.io/)
 [![Singularity version](https://img.shields.io/badge/Singularity-v3.2.1-green.svg)](https://www.sylabs.io/)
