@@ -187,10 +187,10 @@ process getReadLength {
  */
  
 process buildIndex {
-    storeDir "${params.indexfolder}"
+    publishDir "${params.indexfolder}"
     label 'big_comp'
     errorStrategy 'retry'
-    maxRetries 2
+    maxRetries 1
     tag { "${genome_file} with ${annotation_file}" }
     
     input:
