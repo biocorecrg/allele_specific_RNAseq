@@ -12,7 +12,7 @@ install:
   - sudo ln -s $PWD/nextflow /usr/local/bin/nextflow
 
 # Install Allele Specific RNAseq
-  - git clone git@github.com:biocorecrg/allele_specific_RNAseq.git
+  - git clone --depth 1 https://github.com/biocorecrg/allele_specific_RNAseq.git 
   - cd allele_specific_RNAseq
  
 # Run the pipeline
