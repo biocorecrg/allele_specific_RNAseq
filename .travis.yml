@@ -17,4 +17,4 @@ install:
  
 # Run the pipeline
 script:
-   - nextflow run as_rnaseq.nf -with-docker 
+   - nextflow run as_rnaseq.nf -profile local -with-docker 
