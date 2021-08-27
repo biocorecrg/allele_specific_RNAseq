@@ -50,7 +50,19 @@ then the reference genome:
 wget ftp://ftp-mouse.sanger.ac.uk/ref/GRCm38_68.fa
 ```
 
-and the annotation from Ensembl. We used the version Mus_musculus.GRCm38.68 not available in Ensembl archive. 
+and the annotation from Ensembl. We used the version Mus_musculus.GRCm38.68 not available in Ensembl archive.
+
+You can use the pipelines specifying between Docker and Singularity containers by using the options
+
+```
+-with-singularity
+``` 
+
+or
+
+```
+-with-docker
+```
 
 The module **makeAnno** can be used for generating a VCF file with SNP for the interesting species and a genome with SNP position masked with Ns.
 
@@ -58,7 +70,7 @@ For using the module:
 
 ```bash
 cd makeAnno
-nextflow run make_anno.nf -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB 129S1_SvImJ --genome GRCm38_68.fa --outvcf CAST_EiJ-129S1_SvImJ.vcf > log
+nextflow run make_anno.nf -with-singularity -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB 129S1_SvImJ --genome GRCm38_68.fa --outvcf CAST_EiJ-129S1_SvImJ.vcf > log
 ```
 
 This can take some memory for masking the genome. In the output folder named **filteredVCF** you will find both gzipped masked genome and gzipped vcf annotations. 
@@ -66,7 +78,7 @@ This can take some memory for masking the genome. In the output folder named **f
 ## Run the pipeline
 ```bash
 cd allele_specific_RNAseq; 
-nextflow run as_rnaseq.nf -bg > log
+nextflow run as_rnaseq.nf -with-singularity -bg > log
 ```
 
 optionally you might want to check your pipeline on Nextflow's [Tower](https://tower.nf/) website. You need to register using an istitutional mail and set the token provided in a variable as described:
