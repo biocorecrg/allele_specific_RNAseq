@@ -3,6 +3,7 @@
 [![Nextflow version](https://img.shields.io/badge/Nextflow-20.01.0-brightgreen)](https://www.nextflow.io/)
 [![Singularity version](https://img.shields.io/badge/Singularity-v3.2.1-green.svg)](https://www.sylabs.io/)
 [![Docker version](https://img.shields.io/badge/Docker-v19.03-blue)](https://www.docker.com/)
+[![Build Status](https://app.travis-ci.com/biocorecrg/allele_specific_RNAseq.svg?branch=master)](https://app.travis-ci.com/biocorecrg/allele_specific_RNAseq)
 <img align="right" href="https://biocore.crg.eu/" src="https://raw.githubusercontent.com/CRG-CNAG/BioCoreMiscOpen/master/logo/biocore-logo_small.png" />
 
 This **Nextflow**[1] based workflow allows alignment of either single or paired ends reads to a reference transcriptome described as a genome in fasta file plus an annotation in GTF format using **STAR**[2] aligner considering the variant information provided as a VCF file.
