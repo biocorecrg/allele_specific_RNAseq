@@ -17,4 +17,4 @@ install:
  
 # Run the pipeline
 script:
-   - nextflow run as_rnaseq.nf -profile local -with-docker 
+   - travis_wait 30 nextflow run as_rnaseq.nf -profile local -with-docker 
