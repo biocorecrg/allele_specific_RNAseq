@@ -146,7 +146,7 @@ workflow.onComplete {
  * Run FastQC on raw data
 */
 process QConRawReads {
-    tag { read }
+    tag  "${read}" 
     publishDir outputQC
 
     input:
@@ -322,7 +322,7 @@ process tool_report {
  */
 process filterBam {
     publishDir outputvMapping, mode: 'copy'
-    tag { pair_id }
+    tag "${pair_id}"
     label 'big_comp'
 
     input:
@@ -346,7 +346,7 @@ process filterBam {
 process countTags {
 	
 	publishDir outputsCounts, mode: 'copy'
-    tag { bamfile }
+    tag "${bamfile}"
 
 	input:
 	file(annotation_file)
@@ -379,7 +379,7 @@ process countTags {
 process groupCounts {
 	
 	publishDir outputmCounts, mode: 'copy', pattern: "*_group.counts"
-    tag { pair_id }
+    tag "${pair_id}"
 
 	input:
 	file(annotation_file)
@@ -401,7 +401,7 @@ process groupCounts {
  */
 
 process makePropoportions {
-	tag { pair_id }
+	tag "${pair_id}"
 	publishDir outputProp, mode: 'copy'
 
 	input:
