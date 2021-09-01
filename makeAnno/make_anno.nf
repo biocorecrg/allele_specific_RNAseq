@@ -77,7 +77,13 @@ process parseVCF {
 
     script:
     """
-    parseVCF.py -i ${variants_file} -o ${params.outvcf} -1 ${params.speciesA} -2 ${params.speciesB} -g ${genome_file}
+    if [ `echo ${genome_file} | grep ".gz"` ]; then
+       zcat  ${genome_file} > `basename ${genome_file} .gz`
+       parseVCF.py -i ${variants_file} -o ${params.outvcf} -1 ${params.speciesA} -2 ${params.speciesB} -g `basename ${genome_file} .gz`
+    rm `basename ${genome_file} .gz`
+    else   
+       parseVCF.py -i ${variants_file} -o ${params.outvcf} -1 ${params.speciesA} -2 ${params.speciesB} -g ${genome_file}
+    fi
     """
 
 }
