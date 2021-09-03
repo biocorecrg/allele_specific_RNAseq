@@ -85,7 +85,7 @@ optionally you might want to check your pipeline on Nextflow's [Tower](https://t
 
 ```bash
 export TOWER_ACCESS_TOKEN=<<<<<TOKEN NUMBER>>>>>>
-nextflow run as_rnaseq.nf -bg -with-tower > log 
+nextflow run as_rnaseq.nf -with-singularity -bg -with-tower > log 
 ```
 
 you can check the status of your pipeline live on the tower website.
