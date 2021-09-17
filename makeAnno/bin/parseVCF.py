@@ -56,7 +56,8 @@ def parsefile(file, ofile, sp1, sp2):
 		elif(line[0]=="#"):
 			fields = line.split('\t')
 			ind1 = fields.index(sp1)
-			ind2 = fields.index(sp2)
+			if (sp2 != "reference"):
+				ind2 = fields.index(sp2)
 			del(fields[10:])
 			fields[9] = sp1 + "|" + sp2
 			line = "\t".join(fields)
@@ -64,7 +65,10 @@ def parsefile(file, ofile, sp1, sp2):
 		else:
 			fields = line.split('\t')
 			genA = getGen(fields[ind1])
-			genB = getGen(fields[ind2])
+			if (sp2 != "reference"):
+				genB = getGen(fields[ind2])
+			else:
+				genB = '0/0' 
 			# Exclude cases in which on one of two alleles there are no genotype calls
 			if (genA == './.' or genB == './.'):
 				continue
