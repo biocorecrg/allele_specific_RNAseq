@@ -35,7 +35,7 @@ def parsefile(file, oprefix, minvar):
 	pp = pprint.PrettyPrinter(indent=4)
     # prepare out files
 	samfile = pysam.AlignmentFile(file, "rb")
-	ofiles = [oprefix + "_ref.bam", oprefix + "_alleleA.bam", oprefix + "_alleleB.bam", oprefix + "_ambiguous.bam", oprefix + "_cutoff.bam"]
+	ofiles = [oprefix + "_unknown.bam", oprefix + "_alleleA.bam", oprefix + "_alleleB.bam", oprefix + "_ambiguous.bam", oprefix + "_cutoff.bam"]
 	pyoffiles = []
 	for ofile in ofiles:
 		pyoffiles.append(pysam.AlignmentFile(ofile, "wb", template=samfile))
