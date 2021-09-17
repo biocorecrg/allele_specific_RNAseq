@@ -73,6 +73,13 @@ cd makeAnno
 nextflow run make_anno.nf -with-singularity -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB 129S1_SvImJ --genome GRCm38_68.fa --outvcf CAST_EiJ-129S1_SvImJ.vcf > log
 ```
 
+Or in case you want to compare against the reference genome:
+
+```bash
+cd makeAnno
+nextflow run make_anno.nf -with-singularity -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB reference --genome GRCm38_68.fa --outvcf CAST_EiJ-C57BL_6J.vcf > log
+```
+
 This can take some memory for masking the genome. In the output folder named **filteredVCF** you will find both gzipped masked genome and gzipped vcf annotations. 
 
 ## Run the pipeline
