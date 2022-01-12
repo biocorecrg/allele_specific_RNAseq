@@ -121,6 +121,16 @@ providing a real email address will deliver a mail with the multiqc report when 
 
 ### Fastq reads
 Fastq paired ends reads can be either plain or gzipped. 
+You need to specify this syntax for capturing the identifier from single end samples:
+
+```
+PATH/*.fastq.gz
+```
+and this for paired end ones:
+```
+PATH/*_{1,2}.fastq.gz
+```
+
 ### Genome
 Gzipped masked fasta file of the genome obtained running makeAnno
 ### Strandness
