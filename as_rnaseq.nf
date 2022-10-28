@@ -141,11 +141,10 @@ workflow.onComplete {
     """
 }
 
-
-
 /*
  * Run FastQC on raw data
 */
+
 process QConRawReads {
     tag  "${read}" 
     publishDir outputQC
@@ -166,6 +165,7 @@ process QConRawReads {
 /*
  * Extract read length for being used for indexing
 */
+
 process getReadLength {
     input:
     file(single_read_pairs) from read_files_for_size.first()
@@ -179,8 +179,6 @@ process getReadLength {
     	\$cat ${single_read_pairs} | awk '{num++}{if (num%4==2){line++; sum+=length(\$0)} if (line==100) {printf "%.0f", sum/100; exit} }'
     """
 }
-
-
 
 /*
  * Builds the genome index required by the mapping process by using STAR aligner
@@ -221,7 +219,6 @@ process buildIndex {
     fi
     """
 }
-
 
 /*
  * Align reads by using STAR mapper. 
@@ -424,10 +421,10 @@ process makePropoportions {
 }
 
 /*
-* Sum all gene allele counts for each file
+* Sum all genes allele counts for each file
 */
 
-process SumAlleleCountsPerFile {
+process sumAlleleCountsPerFile {
 	tag "${pair_id}"
 	publishDir outputSummary, mode: 'copy'
 
@@ -436,10 +433,10 @@ process SumAlleleCountsPerFile {
     path(outputmCounts)
 	       
 	output:
-	file("Summed_Allele_Counts.txt")
+	file("Summed_Allele_Counts.txt") into summed_allele_counts_ch
 
     """
-    sum_allele_counts_per_file.sh ${outputSummary} > Summed_Allele_Counts.txt
+    sum_allele_counts_per_file.sh ${outputmCounts} > Summed_Allele_Counts.txt
     """
 }
 
