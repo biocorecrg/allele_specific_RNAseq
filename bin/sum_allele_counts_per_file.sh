@@ -27,3 +27,4 @@ for file in ${ALLELE_COUNTS_FILE} ; do
         { print n1, sprintf("%.0f", sA), sprintf("%.0f", sB), sprintf("%.0f", sU), sprintf("%.0f", sAM) }' \
         n1=$ALLELE_COUNTS_FILENAME ${file}
 done
+
