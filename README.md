@@ -70,14 +70,14 @@ For using the module:
 
 ```bash
 cd makeAnno
-nextflow run make_anno.nf -with-singularity -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB 129S1_SvImJ --genome GRCm38_68.fa --outvcf CAST_EiJ-129S1_SvImJ.vcf > log
+NXF_VER=20.01.0 nextflow run make_anno.nf -with-singularity -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB 129S1_SvImJ --genome GRCm38_68.fa --outvcf CAST_EiJ-129S1_SvImJ.vcf > log
 ```
 
 Or in case you want to compare against the reference genome:
 
 ```bash
 cd makeAnno
-nextflow run make_anno.nf -with-singularity -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB reference --genome GRCm38_68.fa --outvcf CAST_EiJ-C57BL_6J.vcf > log
+NXF_VER=20.01.0 nextflow run make_anno.nf -with-singularity -bg --vcffile mgp.v5.merged.snps_all.dbSNP142.vcf.gz --speciesA CAST_EiJ --speciesB reference --genome GRCm38_68.fa --outvcf CAST_EiJ-C57BL_6J.vcf > log
 ```
 
 This can take some memory for masking the genome. In the output folder named **filteredVCF** you will find both gzipped masked genome and gzipped vcf annotations. 
@@ -85,14 +85,14 @@ This can take some memory for masking the genome. In the output folder named **f
 ## Run the pipeline
 ```bash
 cd allele_specific_RNAseq; 
-nextflow run as_rnaseq.nf -with-singularity -bg > log
+NXF_VER=20.01.0 nextflow run as_rnaseq.nf -with-singularity -bg > log
 ```
 
 optionally you might want to check your pipeline on Nextflow's [Tower](https://tower.nf/) website. You need to register using an istitutional mail and set the token provided in a variable as described:
 
 ```bash
 export TOWER_ACCESS_TOKEN=<<<<<TOKEN NUMBER>>>>>>
-nextflow run as_rnaseq.nf -with-singularity -bg -with-tower > log 
+NXF_VER=20.01.0 nextflow run as_rnaseq.nf -with-singularity -bg -with-tower > log 
 ```
 
 you can check the status of your pipeline live on the tower website.
