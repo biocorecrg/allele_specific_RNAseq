@@ -85,7 +85,10 @@ def parseGTF(file):
 					desc_vals = desc_field.lstrip().split(" ")
 					desc_dict[desc_vals[0]] = desc_vals[1]
 				gene_id = desc_dict["gene_id"].strip('"')
-				gene_name = desc_dict["gene_name"].strip('"')
+				if ("gene_name" in desc_dict):
+					gene_name = desc_dict["gene_name"].strip('"')
+				else:
+					gene_name = gene_id
 				gene_names[gene_id]["name"] = gene_name
 				gene_names[gene_id]["chr"] = fields[0]
 	return(gene_names)
