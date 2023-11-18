@@ -62,11 +62,10 @@ In particular you need to change only the following parameters:
   output       = "$baseDir/output_test"
 	single       = "NO"
 	varcut       = 1
-  title	     = "Allele specific RNAseq project"	
+  title	       = "Allele specific RNAseq project"	
 	subtitle     = "This is my wonderful RNA experiment"	
 	PI           = "Luca Cozzuto"	
-	User	     = "Luca Cozzuto"
-	email	     = "mymail@mydomain.eu"	
+	User	       = "Luca Cozzuto"
+	email	       = "mymail@mydomain.eu"	
 ```
-
 

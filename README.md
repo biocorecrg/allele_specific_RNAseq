@@ -56,7 +56,7 @@ You can use the pipelines specifying between Docker and Singularity containers b
 
 ```
 -with-singularity
-``` 
+```
 
 or
 
@@ -105,7 +105,7 @@ The parameters for running the pipeline are defined in the file **params.config*
 |genome |$baseDir/test/GRCm38_68_19.masked.fa.gz|
 |annotation |$baseDir/test/Mus_musculus.GRCm38.68_19.gtf|
 |strandness |reverse|
-|variants |$baseDir/test/19_filt.vcf.gz| 
+|variants |$baseDir/test/19_filt.vcf.gz|
 |output |$baseDir/output_test|
 |single |NO|
 |varcut |1 |
@@ -132,7 +132,7 @@ PATH/*_{1,2}.fastq.gz
 ```
 
 ### Genome
-Gzipped masked fasta file of the genome obtained running makeAnno
+Gzipped masked fasta file of the genome obtained running `nextflow run make_anno.nf`
 ### Strandness
 It can be either "unstranded" or "forward" or "reverse". It depends on the kind of sequencing.
 ### annotation
