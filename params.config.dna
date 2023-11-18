@@ -1,0 +1,19 @@
+params {
+
+	reads        = "$baseDir/test/*{1,2}.fq.gz"
+	genome       = "$baseDir/test/13_1_4M.masked.fa.gz"
+	annotation   = "$baseDir/test/13_1_4M.gtf"
+        indexfolder  = "$baseDir/index"
+        variants     = "$baseDir/test/13_1_4M.vcf.gz"
+	trimming     = "YES"
+        output       = "$baseDir/output_test"
+	single       = "NO"
+	varcut       = 1
+        title	     = "Allele specific RNAseq project"	
+	subtitle     = "This is my wonderful RNA experiment"	
+	PI           = "Luca Cozzuto"	
+	User	     = "Luca Cozzuto"
+	UCSCgenomeID = "mm10"
+	email	     = "mymail@mydomain.eu"	
+
+}
