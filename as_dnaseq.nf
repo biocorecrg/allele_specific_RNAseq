@@ -38,7 +38,7 @@ indexfolder                   : ${params.indexfolder}
 variants                      : ${params.variants}
 trimming                      : ${params.trimming}
 single (YES or NO)            : ${params.single}
-varcut						  : ${params.varcut}
+varcut                        : ${params.varcut}
 output (output folder)        : ${params.output}
 UCSCgenomeID genome ID 
 for UCSC hub (optional)       : ${params.UCSCgenomeID}
