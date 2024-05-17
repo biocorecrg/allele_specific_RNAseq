@@ -7,3 +7,14 @@ work
 singularity
 output
 .nextflow*
+._README_CRG.md
+._as_rnaseq.nf
+bin/._sum_allele_counts_per_file.sh
+bin/._join_counts.sh
+params_original.config
+._params_original.config
+._params.config
+._nextflow.config
+index/
+._*
+makeAnno/filteredVCF/*.gz

@@ -85,6 +85,7 @@ outputReport    = file("${outputMultiQC}/multiqc_report.html")
 outputCounts    = "${outputfolder}/Counts"
 outputsCounts   = "${outputfolder}/cut_${params.varcut}/Allele_single_counts"
 outputmCounts   = "${outputfolder}/cut_${params.varcut}/Allele_merged_Counts"
+outputSummary   = "${outputfolder}/cut_${params.varcut}/Summary"
 UCSCgenomeID    = "${params.UCSCgenomeID}"
 tooldb          = file("conf_tools.txt")
 if( UCSCgenomeID == "" ) {        UCSCgenomeID = "custom"    }
@@ -140,11 +141,10 @@ workflow.onComplete {
     """
 }
 
-
-
 /*
  * Run FastQC on raw data
 */
+
 process QConRawReads {
     tag  "${read}" 
     publishDir outputQC
@@ -165,6 +165,7 @@ process QConRawReads {
 /*
  * Extract read length for being used for indexing
 */
+
 process getReadLength {
     input:
     file(single_read_pairs) from read_files_for_size.first()
@@ -178,8 +179,6 @@ process getReadLength {
     	\$cat ${single_read_pairs} | awk '{num++}{if (num%4==2){line++; sum+=length(\$0)} if (line==100) {printf "%.0f", sum/100; exit} }'
     """
 }
-
-
 
 /*
  * Builds the genome index required by the mapping process by using STAR aligner
@@ -220,7 +219,6 @@ process buildIndex {
     fi
     """
 }
-
 
 /*
  * Align reads by using STAR mapper. 
@@ -315,11 +313,10 @@ process tool_report {
         """
 }
 
-
-
 /*
  * Filter Bam files 
  */
+
 process filterBam {
     publishDir outputvMapping, mode: 'copy'
     tag "${pair_id}"
@@ -370,8 +367,6 @@ process countTags {
     """
 }
 
-
-
 /*
  * Group counts tags 
  */
@@ -386,10 +381,10 @@ process groupCounts {
 	set pair_id, file("*") from tag_counts_for_grouping.groupTuple()
 
 	output:
-	set pair_id, file("*_group.counts") into count_group_for_proportion
+	set pair_id, file("*_group.counts") into count_group_for_proportion, 
+                                             count_group_for_sum_per_file
 	file("*_group.stats") into counts_stats_for_report
        
-
     script:
     """
 	join_counts.sh ${pair_id}
@@ -426,7 +421,27 @@ process makePropoportions {
 }
 
 /*
-* 
+* Sum all genes allele counts for each file
+*/
+
+process sumAlleleCountsPerFile {
+	tag "${pair_id}"
+	publishDir outputSummary, mode: 'copy'
+
+	input:
+	set pair_id, file(group_count) from count_group_for_sum_per_file
+    path(outputmCounts)
+	       
+	output:
+	file("Summed_Allele_Counts.txt") into summed_allele_counts_ch
+
+    """
+    sum_allele_counts_per_file.sh ${outputmCounts} > Summed_Allele_Counts.txt
+    """
+}
+
+/*
+*  MultiQC Report
 */
 
 process multiQC_report {
@@ -479,7 +494,7 @@ def getUnzipName(filename) {
 
 
 workflow.onComplete {
-    println "Pipeline BIOCORE@CRG Master of Pore completed!"
+    println "Pipeline BIOCORE@CRG Allele Specific RNA-seq completed!"
     println "Started at  $workflow.start" 
     println "Finished at $workflow.complete"
     println "Time elapsed: $workflow.duration"

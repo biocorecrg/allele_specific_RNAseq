@@ -116,7 +116,7 @@ workflow.onComplete {
 
 
 workflow.onComplete {
-    println "Pipeline BIOCORE@CRG Master of Pore completed!"
+    println "Pipeline BIOCORE@CRG Allele Specific RNA-seq completed!"
     println "Started at  $workflow.start" 
     println "Finished at $workflow.complete"
     println "Time elapsed: $workflow.duration"
