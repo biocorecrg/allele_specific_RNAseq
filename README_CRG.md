@@ -1,6 +1,64 @@
 # Specific README for CRG
 
-## Install
+Clone the repository:
+
+```bash
+git clone --depth 1 git@github.com:biocorecrg/allele_specific_RNAseq.git
+```
+
+or
+
+```
+git clone --depth 1 https://github.com/biocorecrg/allele_specific_RNAseq.git
+```
+
+depending on your GitHub configuration.
+
+## Install New CRG cluster
+Singularity is already installed. You need to install nextflow locally and add to the path. 
+
+```
+curl -s https://get.nextflow.io | bash
+chmod +x nextflow
+mkdir -p $HOME/.local/bin/
+mv nextflow $HOME/.local/bin/
+```
+
+Then change your .bashrc file for adding the right version of JAVA and nextflow
+
+```
+vi $HOME/.bashrc
+```
+
+type ```i``` for inserting and copy paste this:
+
+
+``` 
+  
+  export EASYBUILD_PREFIX=/software/sit/EasyBuild
+  module use $EASYBUILD_PREFIX/modules/all
+  module load Java/11.0.20
+  export PATH=$HOME/.local/bin/:$PATH
+
+```
+
+and exit typing:
+
+```
+:wq
+```
+and return.
+
+For launching the pipeline you need to create a folder in /scratch or /nfs/scratch02 and then pass this via command line:
+
+```
+mkdir /scratch/YOURGROUP/workdir
+
+sbatch launch_nf.sh nextflow run as_rnaseq.nf -with-singularity -ansi-log false -profile slurm -w /scratch/YOURGROUP/workdir
+```
+
+
+## Install (OLD CLUSTER)
 Singularity is already installed. You need to add to log to nextflow node:
 ```
 ssh -Y nextflow.linux.crg.es
@@ -26,19 +84,13 @@ and exit typing:
 ```
 and return.
 
-Then you can clone the repository:
-
-```bash
-git clone --depth 1 git@github.com:biocorecrg/allele_specific_RNAseq.git
-```
-
-or
+For launching the pipeline you need to create a folder in /nfs/scratch
 
 ```
-git clone --depth 1 https://github.com/biocorecrg/allele_specific_RNAseq.git 
-```
+mkdir /scratch/YOURGROUP/workdir
 
-depending on your GitHub configuration.
+nextflow run as_rnaseq.nf -with-singularity -bg -w /scratch/YOURGROUP/workdir > log.txt
+```
 
 
 ## Annotation data
@@ -59,10 +111,10 @@ In particular you need to change only the following parameters:
 ```
 	reads        = "/test/*_{1,2}.fastq.gz"
 	strandness   = "reverse"
-  output       = "$baseDir/output_test"
+        output       = "$baseDir/output_test"
 	single       = "NO"
 	varcut       = 1
-  title	     = "Allele specific RNAseq project"	
+        title	     = "Allele specific RNAseq project"	
 	subtitle     = "This is my wonderful RNA experiment"	
 	PI           = "Luca Cozzuto"	
 	User	     = "Luca Cozzuto"
