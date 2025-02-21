@@ -38,7 +38,7 @@ strandness                    : ${params.strandness}
 indexfolder                   : ${params.indexfolder}
 variants                      : ${params.variants}
 single (YES or NO)            : ${params.single}
-varcut						  : ${params.varcut}
+varcut			      : ${params.varcut}
 output (output folder)        : ${params.output}
 UCSCgenomeID genome ID 
 for UCSC hub (optional)       : ${params.UCSCgenomeID}
@@ -366,7 +366,7 @@ process countTags {
     }
 
     """
-    htseq-count -s ${strandness} -f bam ${bamfile} ${annotation_file} > `basename ${bamfile} .bam`.counts
+    htseq-count -r pos -s ${strandness} -f bam ${bamfile} ${annotation_file} > `basename ${bamfile} .bam`.counts
     """
 }
 
