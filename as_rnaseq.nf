@@ -330,7 +330,7 @@ process filterBam {
 
     output:
     set pair_id, file("${pair_id}_*_s.bam") into allele_bams
-    set pair_id, file("${pair_id}_*_s.bam.bai") 
+    set pair_id, file("${pair_id}_*_s.bam.bai") into allele_bais 
     
     script:
     """
@@ -366,6 +366,7 @@ process countTags {
     }
 
     """
+    samtools index ${bamfile}
     htseq-count -r pos -s ${strandness} -f bam ${bamfile} ${annotation_file} > `basename ${bamfile} .bam`.counts
     """
 }
