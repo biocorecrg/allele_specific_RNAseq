@@ -161,8 +161,8 @@ The following folder will contain the final outputs:
 
 
 ```
-propA = alleleA/(alleleA+alleleB) * composite 
-propB = alleleB/(alleleA+alleleB) * composite 
+propA = alleleA/(alleleA+alleleB)  
+propB = alleleB/(alleleA+alleleB) 
 ```
 
 
