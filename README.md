@@ -169,7 +169,7 @@ propB = alleleB/(alleleA+alleleB) * composite
 # Citation
 If you use this pipeline please cite:
 
-["Severino J, Bauer M, Mattimoe T, Arecco N, Cozzuto L, Lorden P, Hamada N, Nosaka Y, Nagaoka SI, Audergon P, Tarruell A, Heyn H, Hayashi K, Saitou M, Payer B. Controlled X-chromosome dynamics defines meiotic potential of female mouse in vitro germ cells. EMBO J. 2022 Jun 14;41(12):e109457. doi: 10.15252/embj.2021109457. Epub 2022 May 23. PMID: 35603814; PMCID: PMC9194795.](https://www.embopress.org/doi/full/10.15252/embj.2021109457)
+[Severino J, Bauer M, Mattimoe T, Arecco N, Cozzuto L, Lorden P, Hamada N, Nosaka Y, Nagaoka SI, Audergon P, Tarruell A, Heyn H, Hayashi K, Saitou M, Payer B. Controlled X-chromosome dynamics defines meiotic potential of female mouse in vitro germ cells. EMBO J. 2022 Jun 14;41(12):e109457. doi: 10.15252/embj.2021109457. Epub 2022 May 23. PMID: 35603814; PMCID: PMC9194795.](https://www.embopress.org/doi/full/10.15252/embj.2021109457)
 
 
 
