@@ -159,10 +159,20 @@ The following folder will contain the final outputs:
  * Counts: composite counts per gene per sample. No distincion between alleles. Four fields: gene id, tot counts considering the sequencing unstranded, tot counts considering the sequencind done on the forward strand, tot counts considering reverse strand. This information is useful for validating the strand specific protocol used in the sequencing step.
  * Proportions: for each sample the read count per allele are divided for the sum of counts of the variants and multiplied for the composite count. The count is done considering the strand protocol used and specified as a parameter.
 
+
 ```
 propA = alleleA/(alleleA+alleleB) * composite 
 propB = alleleB/(alleleA+alleleB) * composite 
 ```
+
+
+# Citation
+If you use this pipeline please cite:
+
+["Severino J, Bauer M, Mattimoe T, Arecco N, Cozzuto L, Lorden P, Hamada N, Nosaka Y, Nagaoka SI, Audergon P, Tarruell A, Heyn H, Hayashi K, Saitou M, Payer B. Controlled X-chromosome dynamics defines meiotic potential of female mouse in vitro germ cells. EMBO J. 2022 Jun 14;41(12):e109457. doi: 10.15252/embj.2021109457. Epub 2022 May 23. PMID: 35603814; PMCID: PMC9194795.]([https://link.springer.com/protocol/10.1007/978-1-0716-2962-8_13](https://www.embopress.org/doi/full/10.15252/embj.2021109457))
+
+
+
 
 
 
